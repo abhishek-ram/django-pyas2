@@ -6,10 +6,10 @@ from django.utils.translation import ugettext as _
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from pyas2lib import Partner as AS2Partner, Organization as AS2Organization, \
-    Message as AS2Message
+    Message as AS2Message, MDN as AS2MDN
 from . import settings
-from .utils import store_file
-# import os
+from .utils import store_file, run_post_send
+import requests
 
 
 class PrivateKey(models.Model):
@@ -216,16 +216,28 @@ class MessageManager(models.Manager):
     def create_from_as2message(self, as2message, direction, status):
         """Create the Message from the pyas2lib's Message object"""
 
-        message = self.create(
-            message_id=as2message.message_id,
-            direction=direction,
-            status=status,
-            organization_id=as2message.receiver.as2_id,
-            partner_id=as2message.sender.as2_id,
-            compressed=as2message.compressed,
-            encrypted=as2message.encrypted,
-            signed=as2message.signed,
-        )
+        if direction == 'IN':
+            message = self.create(
+                message_id=as2message.message_id,
+                direction=direction,
+                status=status,
+                organization_id=as2message.receiver.as2_id,
+                partner_id=as2message.sender.as2_id,
+                compressed=as2message.compressed,
+                encrypted=as2message.encrypted,
+                signed=as2message.signed,
+            )
+        else:
+            message = self.create(
+                message_id=as2message.message_id,
+                direction=direction,
+                status=status,
+                organization_id=as2message.sender.as2_id,
+                partner_id=as2message.receiver.as2_id,
+                compressed=as2message.compressed,
+                encrypted=as2message.encrypted,
+                signed=as2message.signed,
+            )
 
         message.headers.save(name='%s.header' % message.message_id,
                              content=ContentFile(as2message.headers_str))
@@ -303,6 +315,67 @@ class Message(models.Model):
 
         return as2m
 
+    def send_message(self, header, payload):
+        """ Send the message to the partner"""
+        # Set up the http auth if specified in the partner profile
+        auth = None
+        if self.partner.http_auth:
+            auth = (self.partner.http_auth_user, self.partner.http_auth_pass)
+
+        # Send the message to the partner
+        try:
+            response = requests.post(
+                self.partner.target_url, auth=auth, headers=header, data=payload)
+            response.raise_for_status()
+        except requests.exceptions.RequestException as e:
+            self.status = 'R'
+            self.save()
+            return
+
+        # Process the MDN based on the partner profile settings
+        if self.partner.mdn:
+            if self.partner.mdn_mode == 'ASYNC':
+                self.status = 'P'
+            else:
+                # Process the synchronous MDN received as response
+
+                # Get the response headers, convert key to lower case
+                # for normalization
+                mdn_headers = dict(
+                    (k.lower().replace('_', '-'), response.headers[k])
+                    for k in response.headers
+                )
+
+                # create the mdn content with message-id and content-type
+                # header and response content
+                mdn_content = '%s: %s\n' % (
+                    'message-id', mdn_headers['message-id'])
+                mdn_content += '%s: %s\n\n' % (
+                    'content-type', mdn_headers['content-type'])
+                mdn_content = mdn_content.encode('utf-8') + response.content
+
+                # Parse the as2 mdn received
+                as2mdn = AS2MDN()
+                _, status, detailed_status = as2mdn.parse(
+                    mdn_content, lambda x, y: self.as2message)
+
+                # Update the message status and return the response
+                if status == 'processed':
+                    self.status = 'S'
+                    run_post_send(self)
+                else:
+                    self.status = 'E'
+                    self.detailed_status = \
+                        'Partner failed to process message: %s' % detailed_status
+                MDN.objects.create_from_as2mdn(
+                    as2mdn=as2mdn, message=self, status='R')
+        else:
+            # No MDN requested mark message as success and run command
+            self.status = 'S'
+            run_post_send(self)
+
+        self.save()
+
     def __str__(self):
         return self.message_id
 
@@ -319,7 +392,7 @@ class MdnManager(models.Manager):
         mdn.headers.save(name='%s.header' % mdn.mdn_id,
                          content=ContentFile(as2mdn.headers_str))
         mdn.payload.save(name='%s.mdn' % mdn.mdn_id,
-                         content=ContentFile(as2mdn.payload))
+                         content=ContentFile(as2mdn.content))
         return mdn
 
 

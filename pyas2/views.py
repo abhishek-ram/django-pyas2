@@ -84,7 +84,7 @@ class AS2Receive(View):
             else:
                 message.status = 'E'
                 message.detailed_status = \
-                    'Partner failed to process MDN: %s' % detailed_status
+                    'Partner failed to process message: %s' % detailed_status
             MDN.objects.create_from_as2mdn(
                 as2mdn=as2mdn, message=message, status='R')
             return HttpResponse(_('AS2 ASYNC MDN has been received'))
