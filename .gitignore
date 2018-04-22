@@ -102,3 +102,5 @@ ENV/
 db.sqlite3
 .idea/
 messages/
+.coverage
+DS_Store

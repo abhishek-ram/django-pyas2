@@ -1,0 +1,8 @@
+[run]
+omit =
+    # Omit the django apps file
+    pyas2/apps.py
+
+    # Omit the django forms and admin file
+    pyas2/forms.py
+    pyas2/admin.py

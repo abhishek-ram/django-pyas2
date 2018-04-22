@@ -5,11 +5,13 @@ from django.core.files.base import ContentFile
 from django.utils.translation import ugettext as _
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from pyas2lib import Partner as AS2Partner, Organization as AS2Organization, \
-    Message as AS2Message, MDN as AS2MDN
+from email.parser import HeaderParser
+from pyas2lib.as2 import Partner as As2Partner, Message as As2Message, \
+    Organization as As2Organization, Mdn as As2Mdn
 from . import settings
 from .utils import store_file, run_post_send
 import requests
+import os
 
 
 class PrivateKey(models.Model):
@@ -58,7 +60,7 @@ class Organization(models.Model):
     def as2org(self):
         """ Returns an object of pyas2lib's Organization class"""
         params = {
-            'as2_id': self.as2_name,
+            'as2_name': self.as2_name,
             'mdn_url': settings.MDN_URL
         }
         if self.signature_key:
@@ -72,7 +74,7 @@ class Organization(models.Model):
         if self.confirmation_message:
             params['mdn_confirm_text'] = self.confirmation_message
 
-        return AS2Organization(**params)
+        return As2Organization(**params)
 
     def __str__(self):
         return self.name
@@ -178,7 +180,7 @@ class Partner(models.Model):
     def as2partner(self):
         """ Returns an object of pyas2lib's Partner class"""
         params = {
-            'as2_id': self.as2_name,
+            'as2_name': self.as2_name,
             'compress': self.compress,
             'sign': True if self.signature else False,
             'digest_alg': self.signature,
@@ -205,7 +207,7 @@ class Partner(models.Model):
         if self.confirmation_message:
             params['mdn_confirm_text'] = self.confirmation_message
 
-        return AS2Partner(**params)
+        return As2Partner(**params)
 
     def __str__(self):
         return self.name
@@ -213,37 +215,51 @@ class Partner(models.Model):
 
 class MessageManager(models.Manager):
 
-    def create_from_as2message(self, as2message, direction, status):
+    def create_from_as2message(self, as2message, payload, direction, status,
+                               detailed_status=None):
         """Create the Message from the pyas2lib's Message object"""
 
         if direction == 'IN':
-            message = self.create(
-                message_id=as2message.message_id,
-                direction=direction,
-                status=status,
-                organization_id=as2message.receiver.as2_id,
-                partner_id=as2message.sender.as2_id,
-                compressed=as2message.compressed,
-                encrypted=as2message.encrypted,
-                signed=as2message.signed,
-            )
+            organization = as2message.receiver.as2_name \
+                if as2message.receiver else None
+            partner = as2message.sender.as2_name if as2message.sender else None
         else:
-            message = self.create(
-                message_id=as2message.message_id,
-                direction=direction,
-                status=status,
-                organization_id=as2message.sender.as2_id,
-                partner_id=as2message.receiver.as2_id,
-                compressed=as2message.compressed,
-                encrypted=as2message.encrypted,
-                signed=as2message.signed,
-            )
+            partner = as2message.receiver.as2_name \
+                if as2message.receiver else None
+            organization = as2message.sender.as2_name \
+                if as2message.sender else None
 
+        message = self.create(
+            message_id=as2message.message_id,
+            direction=direction,
+            status=status,
+            organization_id=organization,
+            partner_id=partner,
+            compressed=as2message.compressed,
+            encrypted=as2message.encrypted,
+            signed=as2message.signed,
+            detailed_status=detailed_status
+        )
+
+        # Save the headers and payload to store
         message.headers.save(name='%s.header' % message.message_id,
                              content=ContentFile(as2message.headers_str))
         message.payload.save(name='%s.msg' % message.message_id,
-                             content=ContentFile(as2message.content))
-        return message
+                             content=ContentFile(payload))
+
+        # Save the payload to the inbox folder
+        full_fn = None
+        if direction == 'IN' and status == 'S':
+            folder = os.path.join(
+                settings.DATA_DIR, 'messages', organization, 'inbox', partner)
+            if message.partner.keep_filename and \
+                    as2message.payload.get_filename():
+                filename = as2message.payload.get_filename()
+            else:
+                filename = '%s.msg' % message.message_id
+            full_fn = store_file(folder, filename, payload)
+
+        return message, full_fn
 
 
 def get_message_store(instance, filename):
@@ -302,11 +318,11 @@ class Message(models.Model):
     def as2message(self):
         """ Returns an object of pyas2lib's Message class"""
         if self.direction == 'IN':
-            as2m = AS2Message(
+            as2m = As2Message(
                 sender=self.partner.as2partner,
                 receiver=self.organization.as2org)
         else:
-            as2m = AS2Message(
+            as2m = As2Message(
                 sender=self.organization.as2org,
                 receiver=self.partner.as2partner)
 
@@ -355,8 +371,8 @@ class Message(models.Model):
                 mdn_content = mdn_content.encode('utf-8') + response.content
 
                 # Parse the as2 mdn received
-                as2mdn = AS2MDN()
-                _, status, detailed_status = as2mdn.parse(
+                as2mdn = As2Mdn()
+                status, detailed_status = as2mdn.parse(
                     mdn_content, lambda x, y: self.as2message)
 
                 # Update the message status and return the response
@@ -386,9 +402,12 @@ class MdnManager(models.Manager):
         """Create the MDN from the pyas2lib's MDN object"""
         signed = True if as2mdn.digest_alg else False
         mdn = self.create(
-            mdn_id=as2mdn.message_id, message=message, status=status,
+            mdn_id=as2mdn.message_id,
+            message=message,
+            status=status,
             signed=signed,
-            return_url=return_url)
+            return_url=return_url
+        )
         mdn.headers.save(name='%s.header' % mdn.mdn_id,
                          content=ContentFile(as2mdn.headers_str))
         mdn.payload.save(name='%s.mdn' % mdn.mdn_id,
@@ -409,7 +428,7 @@ class MDN(models.Model):
         ('P', _('Pending')),
     )
 
-    mdn_id = models.CharField(max_length=100, primary_key=True)
+    mdn_id = models.CharField(max_length=100)
     message = models.OneToOneField(Message, on_delete=models.CASCADE)
     timestamp = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=2, choices=STATUS_CHOICES)
@@ -426,6 +445,26 @@ class MDN(models.Model):
 
     def __str__(self):
         return self.mdn_id
+
+    def send_async_mdn(self):
+        """ Send the asynchronous MDN to the partner"""
+
+        # convert the mdn headers to dictionary
+        headers = HeaderParser().parsestr(self.headers.read())
+
+        # Send the mdn to the partner
+        try:
+            response = requests.post(
+                self.return_url,
+                headers=dict(headers.items()),
+                data=self.payload.read())
+            response.raise_for_status()
+        except requests.exceptions.RequestException as e:
+            return
+
+        # Update the status of the MDN
+        self.status = 'S'
+        self.save()
 
 
 @receiver(post_save, sender=Organization)

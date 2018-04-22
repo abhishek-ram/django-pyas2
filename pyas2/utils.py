@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-from pyas2lib import MDN as AS2MDN
 from string import Template
-import requests
 import logging
 import os
 import time
@@ -31,79 +29,6 @@ def store_file(target_dir, filename, content, archive=False):
     with open(full_filename, 'wb') as tf:
         tf.write(content)
     return full_filename
-
-
-def send_message(message, payload):
-    """ Sends the AS2 message to the partner. Takes the message and payload as
-     arguments and posts the as2 message to the partner."""
-
-    try:
-        # Set up the http auth if specified in the partner profile
-        auth = None
-        if message.partner.http_auth:
-            auth = (message.partner.http_auth_user,
-                    message.partner.http_auth_pass)
-
-        # Send the AS2 message to the partner
-        try:
-            response = requests.post(
-                message.partner.target_url, auth=auth,
-                headers=message.as2message.headers, data=payload)
-            response.raise_for_status()
-
-        except Exception, e:
-            message.status = 'R'
-            message.detailed_status = \
-                'Failure during transmission of message to partner ' \
-                'with error "%s".\n\nTo retry transmission run the ' \
-                'management command "retryfailedas2comms".' % e
-            return
-
-        # Process the MDN based on the partner profile settings
-        if message.partner.mdn:
-            if message.partner.mdn_mode == 'ASYNC':
-                message.status = 'P'
-                return
-
-            # In case of Synchronous MDN the response content will be the MDN.
-            # So process it.  Get the response headers, convert key to lower
-            # case for normalization
-            mdn_headers = dict(
-                (k.lower().replace('_', '-'), response.headers[k])
-                for k in response.headers
-            )
-
-            # create the mdn content with message-id and content-type header
-            # and response content
-            mdn_content = b'%s: %s\n' % (
-                'message-id', mdn_headers['message-id'])
-            mdn_content += b'%s: %s\n\n' % (
-                'content-type', mdn_headers['content-type'])
-            mdn_content += response.content
-
-            logger.debug('Synchronous MDN for message %s received:'
-                         '\n%s' % (message.message_id, mdn_content))
-
-            # Parse the mdn and extract the status
-            mdn = AS2MDN()
-            _, status, detailed_status = mdn.parse(
-                mdn_content, lambda x, y: message.as2message)
-
-            # Update the message status based on MDN data
-            if status == 'processed':
-                message.status = 'S'
-            else:
-                message.status = 'E'
-                message.detailed_status = \
-                    'Partner failed to process MDN: %s' % detailed_status
-        else:
-            message.status = 'S'
-            logger.debug(
-                'No MDN needed, File Transferred successfully to the partner')
-    finally:
-        if message.status == 'S':
-            run_post_send(message)
-        message.save()
 
 
 def run_post_send(message):

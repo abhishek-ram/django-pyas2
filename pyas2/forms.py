@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 from django import forms
 from django.utils.translation import ugettext as _
-from pyas2lib import Organization as AS2Organization, Partner as AS2Partner
+from pyas2lib.as2 import Organization as As2Organization, Partner as As2Partner
 from pyas2lib.exceptions import AS2Exception
 from .models import Partner, PrivateKey, PublicCertificate
 import os
@@ -76,7 +76,8 @@ class PrivateKeyForm(forms.ModelForm):
             cleaned_data['key_file'] = key_file.read()
 
             try:
-                AS2Organization.load_key(cleaned_data['key_file'],
+
+                As2Organization.load_key(cleaned_data['key_file'],
                                          cleaned_data['key_pass'])
             except AS2Exception as e:
                 raise forms.ValidationError(e.args[0])
@@ -140,9 +141,13 @@ class PublicCertificateForm(forms.ModelForm):
                 cleaned_data['cert_ca_file'] = cert_ca_file.read()
 
             try:
-                AS2Partner.load_cert(cleaned_data['cert_file'],
-                                     cleaned_data['cert_ca_file'],
-                                     cleaned_data['verify_cert'])
+                partner = As2Partner(
+                    'partner',
+                    verify_cert=cleaned_data['cert_file'],
+                    verify_cert_ca = cleaned_data['cert_ca_file'],
+                    validate_certs = cleaned_data['verify_cert']
+                )
+                partner.load_verify_cert()
             except AS2Exception as e:
                 raise forms.ValidationError(e.args[0])
 

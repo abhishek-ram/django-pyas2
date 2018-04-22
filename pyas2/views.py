@@ -5,7 +5,7 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from django.utils.translation import ugettext as _
 from django.views.decorators.csrf import csrf_exempt
-from pyas2lib import Message as AS2Message, MDN as AS2MDN
+from pyas2lib.as2 import Message as As2Message, Mdn as As2Mdn
 from pyas2lib.exceptions import *
 from .models import Message, MDN, Partner, Organization
 from .utils import run_post_receive, run_post_send
@@ -25,7 +25,7 @@ class AS2Receive(View):
     def find_message(message_id, partner_id):
         """ Find the org using the message  and return its pyas2 version"""
         message = Message.objects.filter(
-            message_id=message_id, partner_id=partner_id).first()
+            message_id=message_id, partner_id=partner_id.strip()).first()
         if message:
             return message.as2message
 
@@ -65,12 +65,15 @@ class AS2Receive(View):
         # First try to see if this is an MDN
         try:
             logger.debug('Check to see if payload is an Asynchronous MDN.')
-            as2mdn = AS2MDN()
+            as2mdn = As2Mdn()
 
             # Parse the mdn and get the message status
-            as2message, status, detailed_status = as2mdn.parse(
+            status, detailed_status = as2mdn.parse(
                 request_body, self.find_message)
-            message = Message.objects.get(message_id=as2message.message_id)
+            message = Message.objects.get(
+                message_id=as2mdn.orig_message_id,
+                direction='OUT',
+            )
             logger.info(
                 'Asynchronous MDN received for AS2 message {} to organization '
                 '{} from partner {}'.format(as2mdn.message_id,
@@ -85,41 +88,52 @@ class AS2Receive(View):
                 message.status = 'E'
                 message.detailed_status = \
                     'Partner failed to process message: %s' % detailed_status
+            # Save the message and create the mdn
+            message.save()
             MDN.objects.create_from_as2mdn(
                 as2mdn=as2mdn, message=message, status='R')
+
             return HttpResponse(_('AS2 ASYNC MDN has been received'))
 
         except MDNNotFound:
             logger.debug('Payload is not an MDN parse it as an AS2 Message')
-            as2message = AS2Message()
+            as2message = As2Message()
             status, exception, as2mdn = as2message.parse(
                 request_body, self.find_organization, self.find_partner)
 
             logger.info(
                 'Received an AS2 message with id {} for organization {} from '
                 'partner {}'.format(as2message.message_id,
-                                    as2message.receiver.as2_id,
-                                    as2message.sender.as2_id))
+                                    as2message.receiver.as2_name,
+                                    as2message.sender.as2_name))
 
             # Create the Message and MDN objects
-            message = Message.objects.create_from_as2message(
+            message, full_fn = Message.objects.create_from_as2message(
                 as2message=as2message,
+                payload=as2message.content,
                 direction='IN',
-                status='S' if status == 'processed' else 'E')
+                status='S' if status == 'processed' else 'E',
+                detailed_status=exception[1]
+            )
 
-            # return the mdn in case of sync else return text message
-            if as2mdn.mdn_mode == 'SYNC':
+            # run post receive command on success
+            if status == 'processed':
+                run_post_receive(message, full_fn)
+
+            # Return the mdn in case of sync else return text message
+            if as2mdn and as2mdn.mdn_mode == 'SYNC':
                 message.mdn = MDN.objects.create_from_as2mdn(
                     as2mdn=as2mdn, message=message, status='S')
                 response = HttpResponse(as2mdn.content)
                 for key, value in as2mdn.headers.items():
                     response[key] = value
+
                 return response
-            else:
+            elif as2mdn and as2mdn.mdn_mode == 'ASYNC':
                 MDN.objects.create_from_as2mdn(
                     as2mdn=as2mdn, message=message, status='P',
                     return_url=as2mdn.mdn_url)
-                return HttpResponse(_('AS2 message has been received'))
+            return HttpResponse(_('AS2 message has been received'))
 
     def get(self, request, *args, **kwargs):
         """"""

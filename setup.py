@@ -10,7 +10,7 @@ with open(os.path.join(root, 'README.md')) as f:
     README = f.read()
 
 install_requires = [
-    'pyas2lib',
+    'pyas2lib==1.0.1',
     'django>=1.9.0',
     'requests'
 ]
@@ -19,7 +19,8 @@ tests_require = [
     'pytest',
     'pytest-cov',
     'pytest-django',
-    'coverage'
+    'coverage',
+    'mock'
 ]
 
 

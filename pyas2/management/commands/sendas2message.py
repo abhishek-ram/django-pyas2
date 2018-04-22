@@ -52,16 +52,18 @@ class Command(BaseCommand):
 
         # Build and send the AS2 message
         with open(options['path_to_payload'], 'rb') as in_file:
+            payload = in_file.read()
             as2message = AS2Message(
                 sender=org.as2org, receiver=partner.as2partner)
             as2message.build(
-                in_file.read(),
+                payload,
                 filename=os.path.basename(options['path_to_payload']),
                 subject=partner.subject,
                 content_type=partner.content_type
             )
-        message = Message.objects.create_from_as2message(
+        message, _ = Message.objects.create_from_as2message(
             as2message=as2message,
+            content=payload,
             direction='OUT',
             status='P'
         )
