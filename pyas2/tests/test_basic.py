@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 from django.test import TestCase, Client
 from pyas2.models import PrivateKey, PublicCertificate, Organization, Partner, \
     Message, MDN
+from pyas2 import settings
 from pyas2lib.as2 import Message as As2Message
 from email.parser import HeaderParser
 from requests import Response
@@ -72,7 +73,8 @@ class BasicServerClientTestCase(TestCase):
 
     def tearDown(self):
         # remove all files in the inbox folders
-        inbox = os.path.join('messages', 'as2server', 'inbox', 'as2client')
+        inbox = os.path.join(
+            settings.DATA_DIR, 'messages', 'as2server', 'inbox', 'as2client')
         for the_file in os.listdir(inbox):
             file_path = os.path.join(inbox, the_file)
             if os.path.isfile(file_path):

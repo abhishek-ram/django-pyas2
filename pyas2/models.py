@@ -44,9 +44,11 @@ class Organization(models.Model):
         verbose_name=_('AS2 Identifier'), max_length=100, primary_key=True)
     email_address = models.EmailField(null=True, blank=True)
     encryption_key = models.ForeignKey(
-        PrivateKey, null=True, blank=True)
+        PrivateKey, null=True, blank=True, on_delete=models.SET_NULL)
     signature_key = models.ForeignKey(
-        PrivateKey, related_name='org_s', null=True, blank=True)
+        PrivateKey, related_name='org_s', null=True, blank=True,
+        on_delete=models.SET_NULL
+    )
     confirmation_message = models.CharField(
         verbose_name=_('Confirmation Message'),
         max_length=300,
@@ -126,12 +128,14 @@ class Partner(models.Model):
         max_length=20, verbose_name=_('Encrypt Message'),
         choices=ENCRYPT_ALG_CHOICES, null=True, blank=True)
     encryption_cert = models.ForeignKey(
-        PublicCertificate, null=True, blank=True)
+        PublicCertificate, null=True, blank=True, on_delete=models.SET_NULL)
     signature = models.CharField(
         max_length=20, verbose_name=_('Sign Message'),
         choices=SIGN_ALG_CHOICES, null=True, blank=True)
     signature_cert = models.ForeignKey(
-        PublicCertificate, related_name='partner_s', null=True, blank=True)
+        PublicCertificate, related_name='partner_s', null=True, blank=True,
+        on_delete=models.SET_NULL
+    )
 
     mdn = models.BooleanField(verbose_name=_('Request MDN'), default=False)
     mdn_mode = models.CharField(
@@ -294,8 +298,10 @@ class Message(models.Model):
     status = models.CharField(max_length=2, choices=STATUS_CHOICES)
     detailed_status = models.TextField(null=True)
 
-    organization = models.ForeignKey(Organization, null=True)
-    partner = models.ForeignKey(Partner, null=True)
+    organization = models.ForeignKey(
+        Organization, null=True, on_delete=models.SET_NULL)
+    partner = models.ForeignKey(
+        Partner, null=True, on_delete=models.SET_NULL)
 
     headers = models.FileField(
         upload_to=get_message_store, max_length=500, null=True, blank=True)
