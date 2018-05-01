@@ -6,7 +6,7 @@ python:
   - '3.6'
 install:
   - python setup.py install
-  - pip install pytest-cov
+  - pip install pytest-cov pytest-django mock
 script:
   - pytest --cov-config .coveragerc --cov=pyas2lib
 after_success:
