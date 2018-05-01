@@ -8,7 +8,7 @@ from django.dispatch import receiver
 from email.parser import HeaderParser
 from pyas2lib.as2 import Partner as As2Partner, Message as As2Message, \
     Organization as As2Organization, Mdn as As2Mdn
-from . import settings
+from . import settings, byte_cls
 from .utils import store_file, run_post_send
 import requests
 import os
@@ -66,11 +66,11 @@ class Organization(models.Model):
             'mdn_url': settings.MDN_URL
         }
         if self.signature_key:
-            params['sign_key'] = bytes(self.signature_key.key)
+            params['sign_key'] = byte_cls(self.signature_key.key)
             params['sign_key_pass'] = self.signature_key.key_pass
 
         if self.encryption_key:
-            params['decrypt_key'] = bytes(self.encryption_key.key)
+            params['decrypt_key'] = byte_cls(self.encryption_key.key)
             params['decrypt_key_pass'] = self.encryption_key.key_pass
 
         if self.confirmation_message:
@@ -460,7 +460,8 @@ class MDN(models.Model):
         """ Send the asynchronous MDN to the partner"""
 
         # convert the mdn headers to dictionary
-        headers = HeaderParser().parsestr(self.headers.read())
+        headers = HeaderParser().parsestr(
+            self.headers.read().decode())
 
         # Send the mdn to the partner
         try:

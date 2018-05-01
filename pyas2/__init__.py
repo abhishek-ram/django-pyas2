@@ -1,5 +1,9 @@
 import sys
 
+# Set the version
+version = (1, 0, '0b1')
+__version__ = '.'.join(map(str, version))
+
 # Syntax sugar.
 _ver = sys.version_info
 
@@ -9,10 +13,13 @@ is_py2 = (_ver[0] == 2)
 #: Python 3.x?
 is_py3 = (_ver[0] == 3)
 
-# Set the version
-version = (1, 0, '0b1')
+if is_py2:
+    str_cls = unicode  # noqa
+    byte_cls = str
 
-__version__ = '.'.join(map(str, version))
+elif is_py3:
+    str_cls = str
+    byte_cls = bytes
 
 default_app_config = 'pyas2.apps.Pyas2Config'
 

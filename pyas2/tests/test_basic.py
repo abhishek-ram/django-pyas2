@@ -6,7 +6,10 @@ from pyas2 import settings
 from pyas2lib.as2 import Message as As2Message
 from email.parser import HeaderParser
 from requests import Response
-from itertools import izip
+try:
+    from itertools import izip as zip
+except ImportError: # will be 3.x series
+    pass
 import mock
 import os
 
@@ -537,10 +540,10 @@ class BasicServerClientTestCase(TestCase):
     def compareFiles(filename1, filename2):
         with open(filename1, "rtU") as a:
             with open(filename2, "rtU") as b:
-                # Note that "all" and "izip" are lazy
+                # Note that "all" and "zip" are lazy
                 # (will stop at the first line that's not identical)
                 return all(lineA == lineB for lineA, lineB in
-                           izip(a.xreadlines(), b.xreadlines()))
+                           zip(a.readlines(), b.readlines()))
 
 
 class SendMessageMock(object):

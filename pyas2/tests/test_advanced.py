@@ -1,10 +1,10 @@
-from __future__ import unicode_literals
+from __future__ import unicode_literals, absolute_import
 from django.test import TestCase, Client
 from pyas2.models import PrivateKey, PublicCertificate, Organization, Partner, \
     Message
 from pyas2 import settings
 from pyas2lib.as2 import Message as As2Message
-from test_basic import SendMessageMock
+from .test_basic import SendMessageMock
 import mock
 import os
 
@@ -416,7 +416,7 @@ class AdvancedTestCases(TestCase):
         mock_request.side_effect = SendMessageMock(self.client)
         in_message.send_message(
             as2message.headers,
-            'xxxx' + as2message.content if smudge else as2message.content
+            b'xxxx' + as2message.content if smudge else as2message.content
         )
 
         return in_message

@@ -104,3 +104,4 @@ db.sqlite3
 messages/
 .coverage
 .DS_Store
+.pytest_cache/

@@ -1,0 +1,2 @@
+pyas2lib==1.0.3
+requests

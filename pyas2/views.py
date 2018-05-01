@@ -65,7 +65,7 @@ class AS2Receive(View):
         # build the body along with the headers
         request_body = as2headers.encode() + b'\r\n' + request.body
         logger.debug(
-            b'Received an HTTP POST from {} with payload :\n{}'.format(
+            'Received an HTTP POST from {} with payload :\n{}'.format(
                 request.META['REMOTE_ADDR'],  request_body)
         )
 
