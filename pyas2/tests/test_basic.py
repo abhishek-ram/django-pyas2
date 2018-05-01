@@ -70,6 +70,14 @@ class BasicServerClientTestCase(TestCase):
         with open(os.path.join(TEST_DIR, 'testmessage.edi'), 'rb') as fp:
             cls.payload = fp.read()
 
+    def tearDown(self):
+        # remove all files in the inbox folders
+        inbox = os.path.join('messages', 'as2server', 'inbox', 'as2client')
+        for the_file in os.listdir(inbox):
+            file_path = os.path.join(inbox, the_file)
+            if os.path.isfile(file_path):
+                os.unlink(file_path)
+
     def testEndpoint(self):
         """ Test if the as2 reveive endpoint is active """
 

@@ -23,11 +23,18 @@ class AS2Receive(View):
 
     @staticmethod
     def find_message(message_id, partner_id):
-        """ Find the org using the message  and return its pyas2 version"""
+        """ Find the message using the message_id  and return its
+         pyas2 version"""
         message = Message.objects.filter(
             message_id=message_id, partner_id=partner_id.strip()).first()
         if message:
             return message.as2message
+
+    @staticmethod
+    def check_message_exists(message_id, partner_id):
+        """ Check if the message already exists in the system """
+        return Message.objects.filter(
+            message_id=message_id, partner_id=partner_id.strip()).exists()
 
     @staticmethod
     def find_organization(org_id):
@@ -99,13 +106,20 @@ class AS2Receive(View):
             logger.debug('Payload is not an MDN parse it as an AS2 Message')
             as2message = As2Message()
             status, exception, as2mdn = as2message.parse(
-                request_body, self.find_organization, self.find_partner)
-
+                request_body, self.find_organization, self.find_partner,
+                self.check_message_exists
+            )
             logger.info(
                 'Received an AS2 message with id {} for organization {} from '
-                'partner {}'.format(as2message.message_id,
-                                    as2message.receiver.as2_name,
-                                    as2message.sender.as2_name))
+                'partner {}'.format(
+                    as2message.headers.get('message-id'),
+                    as2message.headers.get('as2-to'),
+                    as2message.headers.get('as2-from'))
+            )
+
+            # In case of duplicates update message id
+            if isinstance(exception[0], DuplicateDocument):
+                as2message.message_id += '_duplicate'
 
             # Create the Message and MDN objects
             message, full_fn = Message.objects.create_from_as2message(

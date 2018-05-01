@@ -41,7 +41,7 @@ def run_post_send(message):
         # Create command template and replace variables in the command
         command = Template(command)
         variables = {
-            'filename': message.payload.name,
+            'filename': os.path.basename(message.payload.name),
             'sender': message.organization.as2_name,
             'receiver': message.partner.as2_name,
             'messageid': message.message_id
@@ -63,7 +63,7 @@ def run_post_receive(message, full_filename):
         # Create command template and replace variables in the command
         command = Template(command)
         variables = {
-            'filename': message.payload.name,
+            'filename': os.path.basename(full_filename),
             'fullfilename': full_filename,
             'sender': message.organization.as2_name,
             'receiver': message.partner.as2_name,

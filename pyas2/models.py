@@ -229,16 +229,18 @@ class MessageManager(models.Manager):
             organization = as2message.sender.as2_name \
                 if as2message.sender else None
 
-        message = self.create(
+        message, _ = self.update_or_create(
             message_id=as2message.message_id,
-            direction=direction,
-            status=status,
-            organization_id=organization,
             partner_id=partner,
-            compressed=as2message.compressed,
-            encrypted=as2message.encrypted,
-            signed=as2message.signed,
-            detailed_status=detailed_status
+            organization_id=organization,
+            defaults=dict(
+                direction=direction,
+                status=status,
+                compressed=as2message.compressed,
+                encrypted=as2message.encrypted,
+                signed=as2message.signed,
+                detailed_status=detailed_status
+            )
         )
 
         # Save the headers and payload to store
@@ -401,12 +403,14 @@ class MdnManager(models.Manager):
     def create_from_as2mdn(self, as2mdn, message, status, return_url=None):
         """Create the MDN from the pyas2lib's MDN object"""
         signed = True if as2mdn.digest_alg else False
-        mdn = self.create(
-            mdn_id=as2mdn.message_id,
+        mdn, _ = self.update_or_create(
             message=message,
-            status=status,
-            signed=signed,
-            return_url=return_url
+            defaults=dict(
+                mdn_id=as2mdn.message_id,
+                status=status,
+                signed=signed,
+                return_url=return_url
+            )
         )
         mdn.headers.save(name='%s.header' % mdn.mdn_id,
                          content=ContentFile(as2mdn.headers_str))
