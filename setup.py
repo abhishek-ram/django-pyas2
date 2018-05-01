@@ -3,6 +3,7 @@ import os
 from setuptools import setup, find_packages
 
 version = __import__('pyas2').__version__
+is_py2 = __import__('pyas2').is_py2
 
 root = os.path.abspath(os.path.dirname(__file__))
 
@@ -11,7 +12,7 @@ with open(os.path.join(root, 'README.md')) as f:
 
 install_requires = [
     'pyas2lib==1.0.1',
-    'django>=1.9.0',
+    'django>=1.9.0,<2.0' if is_py2 else 'django>=1.9.0',
     'requests'
 ]
 
