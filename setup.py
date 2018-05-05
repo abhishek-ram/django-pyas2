@@ -12,7 +12,7 @@ with open(os.path.join(root, 'README.md')) as f:
 
 install_requires = [
     'pyas2lib==1.0.3',
-    'django>=1.9.0,<2.0' if is_py2 else 'django>=1.9.0',
+    'django>=1.10.0,<2.0' if is_py2 else 'django>=1.10.0',
     'requests'
 ]
 
