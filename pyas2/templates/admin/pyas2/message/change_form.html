@@ -1,0 +1,98 @@
+{% extends "admin/change_form.html" %}
+{% load i18n admin_urls static%}
+
+{% block title %} View Message Details{% endblock title %}
+{% block content %}
+  {% block content_title %}{% endblock %}
+  <h1> View Message Details</h1>
+  <div>
+    <fieldset class="module aligned ">
+      <div class="form-row field-name">
+        <div>
+          <label class="required" >Message ID:</label>
+          <p>{{ original.message_id }}</p>
+        </div>
+      </div>
+      <div class="form-row field-name">
+        <div>
+          <label class="required" >Organization:</label>
+          <p>{{ original.organization }}</p>
+        </div>
+      </div>
+      <div class="form-row field-name">
+        <div>
+          <label class="required" >Partner:</label>
+          <p>{{ original.partner }}</p>
+        </div>
+      </div>
+      <div class="form-row field-name">
+        <div>
+          <label class="required" >Direction:</label>
+          <p>{{ original.get_direction_display }}</p>
+        </div>
+      </div>
+      <div class="form-row field-name">
+        <div>
+          <label class="required" >Compressed:</label>
+          {% if original.compressed %}
+            <img src="{% static "admin/img/icon-yes.svg"%}" alt="Yes">
+          {% else %}
+            <img src="{% static "admin/img/icon-no.svg"%}" alt="No">
+          {% endif %}
+        </div>
+      </div>
+      <div class="form-row field-name">
+        <div>
+          <label class="required" >Encrypted:</label>
+          {% if original.encrypted %}
+            <img src="{% static "admin/img/icon-yes.svg"%}" alt="Yes">
+          {% else %}
+            <img src="{% static "admin/img/icon-no.svg"%}" alt="No">
+          {% endif %}
+        </div>
+      </div>
+      <div class="form-row field-name">
+        <div>
+          <label class="required" >Signed:</label>
+          {% if original.signed %}
+            <img src="{% static "admin/img/icon-yes.svg"%}" alt="Yes">
+          {% else %}
+            <img src="{% static "admin/img/icon-no.svg"%}" alt="No">
+          {% endif %}
+        </div>
+      </div>
+      <div class="form-row field-name">
+        <div>
+          <label class="required" >Status:</label>
+          <img src="{% static original.status_icon %}"
+               alt="{{ original.status }}">
+        </div>
+      </div>
+      {% if original.detailed_status %}
+        <div class="form-row field-name">
+          <div>
+            <label class="required" >Detailed Status:</label>
+            <textarea required="" rows="10" cols="40" class="vLargeTextField"
+                      disabled>{{ original.detailed_status }}</textarea>
+          </div>
+        </div>
+      {% endif %}
+      <div class="form-row field-name">
+        <div>
+          <label class="required" >Message Headers:</label>
+          <textarea required="" rows="10" cols="40" class="vLargeTextField"
+                    disabled>{{ original.headers.read }}</textarea>
+        </div>
+      </div>
+      {% if original.payload %}
+        <div class="form-row field-name">
+          <div>
+            <label class="required" >Message Payload:</label>
+            <a class="button" href="{% url "download-file" "message_payload" original.id %}">
+              Download File</a>
+          </div>
+        </div>
+      {% endif %}
+    </fieldset>
+  </div>
+{% endblock content %}

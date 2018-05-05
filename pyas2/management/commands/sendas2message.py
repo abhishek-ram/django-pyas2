@@ -63,7 +63,7 @@ class Command(BaseCommand):
             )
         message, _ = Message.objects.create_from_as2message(
             as2message=as2message,
-            content=payload,
+            payload=payload,
             direction='OUT',
             status='P'
         )

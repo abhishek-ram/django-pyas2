@@ -1,0 +1,55 @@
+{% extends "admin/change_form.html" %}
+{% load i18n admin_urls static%}
+
+{% block title %} View MDN Details{% endblock title %}
+{% block content %}
+  {% block content_title %}{% endblock %}
+  <h1> View MDN Details</h1>
+  <div>
+    <fieldset class="module aligned ">
+      <div class="form-row field-name">
+        <div>
+          <label class="required" >MDN ID:</label>
+          <p>{{ original.mdn_id }}</p>
+        </div>
+      </div>
+      <div class="form-row field-name">
+        <div>
+          <label class="required" >Message:</label>
+          <a href="{% url 'admin:pyas2_message_change' original.message_id%}">
+            {{ original.message.message_id}}</a>
+        </div>
+      </div>
+      <div class="form-row field-name">
+        <div>
+          <label class="required" >Status:</label>
+          <p>{{ original.get_status_display }}</p>
+        </div>
+      </div>
+      <div class="form-row field-name">
+        <div>
+          <label class="required" >Signed:</label>
+          {% if original.signed %}
+            <img src="{% static "admin/img/icon-yes.svg"%}" alt="Yes">
+          {% else %}
+            <img src="{% static "admin/img/icon-no.svg"%}" alt="No">
+          {% endif %}
+        </div>
+      </div>
+      <div class="form-row field-name">
+        <div>
+          <label class="required" >Message Headers:</label>
+          <textarea required="" rows="10" cols="40" class="vLargeTextField"
+                    disabled>{{ original.headers.read }}</textarea>
+        </div>
+      </div>
+      <div class="form-row field-name">
+        <div>
+          <label class="required" >Message Headers:</label>
+          <textarea required="" rows="20" cols="40" class="vLargeTextField"
+                    disabled>{{ original.payload.read }}</textarea>
+        </div>
+      </div>
+    </fieldset>
+  </div>
+{% endblock content %}

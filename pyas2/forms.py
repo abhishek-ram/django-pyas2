@@ -3,7 +3,7 @@ from django import forms
 from django.utils.translation import ugettext as _
 from pyas2lib.as2 import Organization as As2Organization, Partner as As2Partner
 from pyas2lib.exceptions import AS2Exception
-from .models import Partner, PrivateKey, PublicCertificate
+from .models import Partner, PrivateKey, PublicCertificate, Organization
 import os
 
 
@@ -144,8 +144,8 @@ class PublicCertificateForm(forms.ModelForm):
                 partner = As2Partner(
                     'partner',
                     verify_cert=cleaned_data['cert_file'],
-                    verify_cert_ca = cleaned_data['cert_ca_file'],
-                    validate_certs = cleaned_data['verify_cert']
+                    verify_cert_ca=cleaned_data['cert_ca_file'],
+                    validate_certs=cleaned_data['verify_cert']
                 )
                 partner.load_verify_cert()
             except AS2Exception as e:
@@ -168,3 +168,11 @@ class PublicCertificateForm(forms.ModelForm):
     class Meta:
         model = PublicCertificate
         fields = ['cert_file', 'cert_ca_file', 'verify_cert']
+
+
+class SendAs2MessageForm(forms.Form):
+    organization = forms.ModelChoiceField(
+        queryset=Organization.objects.all(), empty_label=None)
+    partner = forms.ModelChoiceField(queryset=Partner.objects.all())
+    file = forms.FileField()
+

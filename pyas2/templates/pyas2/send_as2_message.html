@@ -1,0 +1,78 @@
+{% extends "admin/base_site.html" %}
+{% load i18n l10n admin_urls static %}
+
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "admin/css/forms.css" %}" />{% endblock %}
+{% block bodyclass %}{{ block.super }} app-{{ opts.app_label }} model-{{ opts.model_name }} change-form{% endblock %}
+
+{% block breadcrumbs %}
+  <div class="breadcrumbs">
+  <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+  &rsaquo; <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
+  &rsaquo; <a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
+  &rsaquo; {% trans 'Send Message to Partner' %}
+</div>
+{% endblock %}
+
+{% block title %} Send Message to Partner {% endblock title %}
+
+{% block content %}
+  <h1>{% trans 'Send Message to Partner' %}</h1>
+  <div id="content-main">
+
+    <form method="post" enctype="multipart/form-data" action="" novalidate>
+      {% csrf_token %}
+      <div>
+        {% for field in form %}
+          {% if field.errors %}
+            <p class="errornote">
+              Please correct the errors below.
+            </p>
+          {% endif %}
+        {% endfor %}
+
+        <fieldset class="module aligned ">
+
+          <div class="form-row {% if form.organization.errors %}errors{% endif %}
+              field-organization">
+            {{ form.organization.errors }}
+            <div>
+              <label class="required" for="id_organization">Organization:</label>
+              <select name="organization" required id="id_organization">
+                {% for value, text in form.organization.field.choices %}
+                  <option value="{{ value }}">{{ text }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row {% if form.partner.errors %}errors{% endif %}
+              field-partner">
+            {{ form.partner.errors }}
+            <div>
+              <label class="required" for="id_partner">Partner:</label>
+              <select name="partner" required id="id_partner">
+                {% for value, text in form.partner.field.choices %}
+                  <option {% if request.GET.partner_id == value %}selected{% endif %}
+                      value="{{ value }}" >{{ text }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row {% if form.file.errors %}errors{% endif %}
+              field-file">
+            {{ form.file.errors }}
+            <div>
+              <label class="required" for="id_file">File:</label>
+              <input type="file" name="file" required id="id_file" />
+            </div>
+          </div>
+
+        </fieldset>
+
+        <input type="submit" value="{% trans "Send Message" %}" />
+
+      </div>
+    </form>
+  </div>
+{% endblock %}

@@ -339,6 +339,18 @@ class Message(models.Model):
 
         return as2m
 
+    @property
+    def status_icon(self):
+        """ Return the icon for message status """
+        if self.status == 'S':
+            return 'admin/img/icon-yes.svg'
+        elif self.status == 'E':
+            return 'admin/img/icon-no.svg'
+        elif self.status in ['W', 'P']:
+            return 'admin/img/icon-clock.sng'
+        else:
+            return 'admin/img/icon-unknown.sng'
+
     def send_message(self, header, payload):
         """ Send the message to the partner"""
         # Set up the http auth if specified in the partner profile
@@ -391,7 +403,7 @@ class Message(models.Model):
                     self.status = 'E'
                     self.detailed_status = \
                         'Partner failed to process message: %s' % detailed_status
-                MDN.objects.create_from_as2mdn(
+                Mdn.objects.create_from_as2mdn(
                     as2mdn=as2mdn, message=self, status='R')
         else:
             # No MDN requested mark message as success and run command
@@ -431,7 +443,7 @@ def get_mdn_store(instance, filename):
     return '{0}/{1}'.format(target_dir, filename)
 
 
-class MDN(models.Model):
+class Mdn(models.Model):
     STATUS_CHOICES = (
         ('S', _('Sent')),
         ('R', _('Received')),

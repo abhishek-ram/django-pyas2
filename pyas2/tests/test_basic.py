@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 from django.test import TestCase, Client
 from pyas2.models import PrivateKey, PublicCertificate, Organization, Partner, \
-    Message, MDN
+    Message, Mdn
 from pyas2 import settings
 from pyas2lib.as2 import Message as As2Message
 from email.parser import HeaderParser
@@ -499,7 +499,7 @@ class BasicServerClientTestCase(TestCase):
         out_message.mdn.send_async_mdn()
 
         # Make sure the mdn has been created
-        mdn = MDN.objects.filter(message=in_message).first()
+        mdn = Mdn.objects.filter(message=in_message).first()
         self.assertIsNotNone(mdn)
         self.assertEqual(mdn.message.status, 'S')
         self.assertTrue(mdn.signed)

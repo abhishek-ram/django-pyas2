@@ -1,1 +1,6 @@
-{}
+{
+  "pyas2/tests/test_advanced.py::AdvancedTestCases": true, 
+  "pyas2/tests/test_advanced.py::TestCase": true, 
+  "pyas2/tests/test_basic.py::BasicServerClientTestCase": true, 
+  "pyas2/tests/test_basic.py::TestCase": true
+}
