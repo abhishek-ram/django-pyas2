@@ -74,6 +74,7 @@ Guide
 
    installation
    quickstart
+   configuration
    changelog
 
 .. _`RFC 4130`: https://www.ietf.org/rfc/rfc4130.txt
