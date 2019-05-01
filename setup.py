@@ -2,17 +2,14 @@
 import os
 from setuptools import setup, find_packages
 
-version = __import__('pyas2').__version__
-is_py2 = __import__('pyas2').is_py2
-
 root = os.path.abspath(os.path.dirname(__file__))
 
 with open(os.path.join(root, 'README.md')) as f:
     README = f.read()
 
 install_requires = [
-    'pyas2lib==1.0.3',
-    'django>=1.10.0,<2.0' if is_py2 else 'django>=1.10.0',
+    'pyas2lib==1.1.0',
+    'django>=1.10.0',
     'requests'
 ]
 
@@ -27,7 +24,7 @@ tests_require = [
 
 setup(
     name='django-pyas2',
-    version=version,
+    version='1.0.0',
     description='A Django app for transferring files using AS2 protocol',
     license="GNU GPL v3.0",
     long_description=README,
@@ -44,11 +41,9 @@ setup(
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
         'Operating System :: OS Independent',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
         "Topic :: Security :: Cryptography",
         "Topic :: Communications",
     ],

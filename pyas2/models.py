@@ -1,17 +1,21 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-from django.db import models
+import os
+import requests
 from django.core.files.base import ContentFile
-from django.utils.translation import ugettext as _
+from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils.translation import ugettext as _
 from email.parser import HeaderParser
-from pyas2lib.as2 import Partner as As2Partner, Message as As2Message, \
-    Organization as As2Organization, Mdn as As2Mdn
-from . import settings, byte_cls
-from .utils import store_file, run_post_send
-import requests
-import os
+from pyas2lib import Mdn as As2Mdn
+from pyas2lib import Message as As2Message
+from pyas2lib import Organization as As2Organization
+from pyas2lib import Partner as As2Partner
+from uuid import uuid4
+
+from pyas2 import settings
+from pyas2.utils import run_post_send
+from pyas2.utils import store_file
 
 
 class PrivateKey(models.Model):
@@ -49,9 +53,8 @@ class Organization(models.Model):
         PrivateKey, related_name='org_s', null=True, blank=True,
         on_delete=models.SET_NULL
     )
-    confirmation_message = models.CharField(
+    confirmation_message = models.TextField(
         verbose_name=_('Confirmation Message'),
-        max_length=300,
         null=True,
         blank=True,
         help_text=_('Use this field to send a customized message in the '
@@ -66,11 +69,11 @@ class Organization(models.Model):
             'mdn_url': settings.MDN_URL
         }
         if self.signature_key:
-            params['sign_key'] = byte_cls(self.signature_key.key)
+            params['sign_key'] = bytes(self.signature_key.key)
             params['sign_key_pass'] = self.signature_key.key_pass
 
         if self.encryption_key:
-            params['decrypt_key'] = byte_cls(self.encryption_key.key)
+            params['decrypt_key'] = bytes(self.encryption_key.key)
             params['decrypt_key_pass'] = self.encryption_key.key_pass
 
         if self.confirmation_message:
@@ -93,10 +96,16 @@ class Partner(models.Model):
         ('tripledes_192_cbc', '3DES'),
         ('rc2_128_cbc', 'RC2-128'),
         ('rc4_128_cbc', 'RC4-128'),
+        ('aes_128_cbc', 'AES-128'),
+        ('aes_192_cbc', 'AES-192'),
+        ('aes_256_cbc', 'AES-256')
     )
     SIGN_ALG_CHOICES = (
         ('sha1', 'SHA-1'),
+        ('sha224', 'SHA-224'),
         ('sha256', 'SHA-256'),
+        ('sha384', 'SHA-384'),
+        ('sha512', 'SHA-512')
     )
     MDN_TYPE_CHOICES = (
         ('SYNC', 'Synchronous'),
@@ -144,9 +153,8 @@ class Partner(models.Model):
         max_length=20, verbose_name=_('Request Signed MDN'),
         choices=SIGN_ALG_CHOICES, null=True, blank=True)
 
-    confirmation_message = models.CharField(
+    confirmation_message = models.TextField(
         verbose_name=_('Confirmation Message'),
-        max_length=300,
         null=True,
         blank=True,
         help_text=_(
@@ -248,9 +256,9 @@ class MessageManager(models.Manager):
         )
 
         # Save the headers and payload to store
-        message.headers.save(name='%s.header' % message.message_id,
+        message.headers.save(name='%s.header' % uuid4(),
                              content=ContentFile(as2message.headers_str))
-        message.payload.save(name='%s.msg' % message.message_id,
+        message.payload.save(name='%s.msg' % uuid4(),
                              content=ContentFile(payload))
 
         # Save the payload to the inbox folder
@@ -269,8 +277,10 @@ class MessageManager(models.Manager):
 
 
 def get_message_store(instance, filename):
-    target_dir = settings.PAYLOAD_SENT_STORE if instance.direction == 'OUT' \
-        else settings.PAYLOAD_RECEIVED_STORE
+    if instance.direction == 'OUT':
+        target_dir = os.path.join('messages', '__store', 'payload', 'sent')
+    else:
+        target_dir = os.path.join('messages', '__store', 'payload', 'received')
     return '{0}/{1}'.format(target_dir, filename)
 
 
@@ -291,7 +301,7 @@ class Message(models.Model):
         ('ASYNC', _('Asynchronous')),
     )
 
-    message_id = models.CharField(max_length=100)
+    message_id = models.CharField(max_length=255)
     direction = models.CharField(max_length=5, choices=DIRECTION_CHOICES)
     timestamp = models.DateTimeField(auto_now_add=True)
 
@@ -304,9 +314,9 @@ class Message(models.Model):
         Partner, null=True, on_delete=models.SET_NULL)
 
     headers = models.FileField(
-        upload_to=get_message_store, max_length=500, null=True, blank=True)
+        upload_to=get_message_store, null=True, blank=True)
     payload = models.FileField(
-        upload_to=get_message_store, max_length=500, null=True, blank=True)
+        upload_to=get_message_store, null=True, blank=True)
 
     compressed = models.BooleanField(default=False)
     encrypted = models.BooleanField(default=False)
@@ -385,7 +395,7 @@ class Message(models.Model):
                 # create the mdn content with message-id and content-type
                 # header and response content
                 mdn_content = '%s: %s\n' % (
-                    'message-id', mdn_headers['message-id'])
+                    'message-id', mdn_headers.get('message-id', self.message_id))
                 mdn_content += '%s: %s\n\n' % (
                     'content-type', mdn_headers['content-type'])
                 mdn_content = mdn_content.encode('utf-8') + response.content
@@ -430,16 +440,19 @@ class MdnManager(models.Manager):
                 return_url=return_url
             )
         )
-        mdn.headers.save(name='%s.header' % mdn.mdn_id,
+        mdn.headers.save(name='%s.header' % uuid4(),
                          content=ContentFile(as2mdn.headers_str))
-        mdn.payload.save(name='%s.mdn' % mdn.mdn_id,
+        mdn.payload.save(name='%s.mdn' % uuid4(),
                          content=ContentFile(as2mdn.content))
         return mdn
 
 
 def get_mdn_store(instance, filename):
-    target_dir = settings.MDN_SENT_STORE if instance.status == 'S' \
-        else settings.MDN_RECEIVED_STORE
+    if instance.status == 'S':
+        target_dir = os.path.join('messages', '__store', 'mdn', 'sent')
+    else:
+        target_dir = os.path.join('messages', '__store', 'mdn', 'received')
+
     return '{0}/{1}'.format(target_dir, filename)
 
 
@@ -450,7 +463,7 @@ class Mdn(models.Model):
         ('P', _('Pending')),
     )
 
-    mdn_id = models.CharField(max_length=100)
+    mdn_id = models.CharField(max_length=255)
     message = models.OneToOneField(Message, on_delete=models.CASCADE)
     timestamp = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=2, choices=STATUS_CHOICES)
@@ -459,9 +472,9 @@ class Mdn(models.Model):
     return_url = models.URLField(null=True)
 
     headers = models.FileField(
-        upload_to=get_mdn_store, max_length=500, null=True, blank=True)
+        upload_to=get_mdn_store, null=True, blank=True)
     payload = models.FileField(
-        upload_to=get_mdn_store, max_length=500, null=True, blank=True)
+        upload_to=get_mdn_store, null=True, blank=True)
 
     objects = MdnManager()
 

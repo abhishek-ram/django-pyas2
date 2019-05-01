@@ -1,11 +1,18 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
 from django.contrib import admin
-from django.urls import reverse_lazy
 from django.http import HttpResponseRedirect
-from .models import Partner, Organization, PublicCertificate, \
-    PrivateKey, Message, Mdn
-from .forms import PrivateKeyForm, PartnerForm, PublicCertificateForm
+from django.urls import reverse_lazy
+from django.utils.html import format_html
+
+from pyas2.models import Mdn
+from pyas2.models import Message
+from pyas2.models import Organization
+from pyas2.models import Partner
+from pyas2.models import PrivateKey
+from pyas2.models import PublicCertificate
+from pyas2.forms import PartnerForm
+from pyas2.forms import PublicCertificateForm
+from pyas2.forms import PrivateKeyForm
 
 
 @admin.register(PrivateKey)
@@ -14,8 +21,10 @@ class PrivateKeyAdmin(admin.ModelAdmin):
     list_display = ('name', 'download_key',)
 
     def download_key(self, obj):
-        return '<a href="%s" class="button">Click to Download</a>' % \
-               reverse_lazy('download-file', args=['private_key', obj.id])
+        download_url = reverse_lazy('download-file',
+                                    args=['private_key', obj.id])
+        return format_html('<a href="{}" class="button">Click to Download</a>',
+                           download_url)
 
     download_key.allow_tags = True
     download_key.short_description = "Key File"
@@ -27,8 +36,10 @@ class PublicCertificateAdmin(admin.ModelAdmin):
     list_display = ('name', 'download_cert',)
 
     def download_cert(self, obj):
-        return '<a href="%s" class="button">Click to Download</a>' % \
-               reverse_lazy('download-file', args=['public_cert', obj.id])
+        download_url = reverse_lazy('download-file',
+                                    args=['public_cert', obj.id])
+        return format_html('<a href="{}" class="button">Click to Download</a>',
+                           download_url)
 
     download_cert.allow_tags = True
     download_cert.short_description = "Certificate File"
@@ -98,10 +109,12 @@ class MessageAdmin(admin.ModelAdmin):
 
     def mdn_url(self, obj):
         if hasattr(obj, 'mdn'):
-            return '<a href="%s" class="button">View MDN</a>' % \
-                   reverse_lazy('admin:%s_%s_change' % (Mdn._meta.app_label,
-                                                        Mdn._meta.model_name),
-                                args=[obj.mdn.id])
+            view_url = reverse_lazy(
+                'admin:%s_%s_change' % (Mdn._meta.app_label,
+                                        Mdn._meta.model_name),
+                args=[obj.mdn.id])
+            return format_html('<a href="{}" class="button">View MDN</a>',
+                               view_url)
 
     mdn_url.allow_tags = True
     mdn_url.short_description = "MDN"

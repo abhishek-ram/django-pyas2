@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-from string import Template
 import logging
 import os
 import time
+from string import Template
 
 logger = logging.getLogger('pyas2')
 

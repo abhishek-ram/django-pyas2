@@ -538,8 +538,8 @@ class BasicServerClientTestCase(TestCase):
 
     @staticmethod
     def compareFiles(filename1, filename2):
-        with open(filename1, "rtU") as a:
-            with open(filename2, "rtU") as b:
+        with open(filename1, "rt") as a:
+            with open(filename2, "rt") as b:
                 # Note that "all" and "zip" are lazy
                 # (will stop at the first line that's not identical)
                 return all(lineA == lineB for lineA, lineB in

@@ -1,12 +1,17 @@
-from __future__ import unicode_literals, absolute_import
-from django.test import TestCase, Client
-from pyas2.models import PrivateKey, PublicCertificate, Organization, Partner, \
-    Message
-from pyas2 import settings
-from pyas2lib.as2 import Message as As2Message
-from .test_basic import SendMessageMock
 import mock
 import os
+from django.core import management
+from django.test import Client
+from django.test import TestCase
+from pyas2lib import Message as As2Message
+
+from pyas2 import settings
+from pyas2.models import Message
+from pyas2.models import Organization
+from pyas2.models import Partner
+from pyas2.models import PrivateKey
+from pyas2.models import PublicCertificate
+from pyas2.tests.test_basic import SendMessageMock
 
 TEST_DIR = os.path.join((os.path.dirname(
     os.path.abspath(__file__))),  'fixtures')
@@ -397,6 +402,19 @@ class AdvancedTestCases(TestCase):
         self.assertEqual(out_message.status, 'E')
         self.assertTrue(
             'Failed to verify message signature' in out_message.detailed_status)
+
+    def test_sendmessage_command(self):
+        """ Test the command for sending as2 messages """
+        test_message = os.path.join(TEST_DIR, 'testmessage.edi')
+
+        # Try to run with invalid org and client
+        with self.assertRaises(management.CommandError):
+            management.call_command(
+                'sendas2message', 'AS2 Server', 'AS2 Client', test_message)
+
+        with self.assertRaises(SystemExit):
+            management.call_command(
+                'sendas2message', 'as2server', 'as2client', test_message)
 
     @mock.patch('requests.post')
     def build_and_send(self, partner, mock_request, smudge=False):

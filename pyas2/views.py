@@ -1,21 +1,29 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-from django.shortcuts import HttpResponse, get_object_or_404, Http404
-from django.utils.decorators import method_decorator
-from django.views import View
-from django.views.generic import FormView
-from django.utils.translation import ugettext as _
-from django.views.decorators.csrf import csrf_exempt
-from django.urls import reverse_lazy
-from django.contrib import messages
-from pyas2lib.as2 import Message as As2Message, Mdn as As2Mdn
-from pyas2lib.exceptions import *
-from .models import Message, Mdn, Partner, Organization, PrivateKey, \
-    PublicCertificate
-from .utils import run_post_receive, run_post_send
-from .forms import SendAs2MessageForm
 import logging
 import os
+from django.contrib import messages
+from django.shortcuts import Http404
+from django.shortcuts import HttpResponse
+from django.shortcuts import get_object_or_404
+from django.utils.decorators import method_decorator
+from django.utils.translation import ugettext as _
+from django.urls import reverse_lazy
+from django.views import View
+from django.views.decorators.csrf import csrf_exempt
+from django.views.generic import FormView
+from pyas2lib import Message as As2Message
+from pyas2lib import Mdn as As2Mdn
+from pyas2lib.exceptions import *
+
+from pyas2.models import Mdn
+from pyas2.models import Message
+from pyas2.models import Organization
+from pyas2.models import Partner
+from pyas2.models import PrivateKey
+from pyas2.models import PublicCertificate
+from pyas2.utils import run_post_receive
+from pyas2.utils import run_post_send
+from pyas2.forms import SendAs2MessageForm
 
 logger = logging.getLogger('pyas2')
 

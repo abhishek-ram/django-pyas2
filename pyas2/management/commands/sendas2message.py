@@ -1,10 +1,13 @@
-from __future__ import unicode_literals
-from django.core.management.base import BaseCommand, CommandError
-from pyas2.models import Organization, Partner, Message
-from pyas2lib import Message as AS2Message, MDN as AS2MDN
 import logging
 import os
 import sys
+from django.core.management.base import BaseCommand
+from django.core.management.base import CommandError
+from pyas2lib import Message as AS2Message
+
+from pyas2.models import Message
+from pyas2.models import Organization
+from pyas2.models import Partner
 
 logger = logging.getLogger('pyas2')
 

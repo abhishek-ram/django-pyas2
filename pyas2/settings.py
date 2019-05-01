@@ -10,17 +10,7 @@ if APP_SETTINGS.get('DATA_DIR') \
         and os.path.isdir(APP_SETTINGS['DATA_DIR']):
     DATA_DIR = APP_SETTINGS['DATA_DIR']
 else:
-    DATA_DIR = settings.BASE_DIR
-
-# Set the payload and mdn store directories
-PAYLOAD_RECEIVED_STORE = os.path.join(
-    DATA_DIR, 'messages', '__store', 'payload', 'received')
-PAYLOAD_SENT_STORE = os.path.join(
-    DATA_DIR, 'messages', '__store', 'payload', 'sent')
-MDN_RECEIVED_STORE = os.path.join(
-    DATA_DIR, 'messages', '__store', 'mdn', 'received')
-MDN_SENT_STORE = os.path.join(
-    DATA_DIR, 'messages', '__store', 'mdn', 'sent')
+    DATA_DIR = settings.MEDIA_ROOT or settings.BASE_DIR
 
 # Max number of times to retry failed sends
 MAX_RETRIES = APP_SETTINGS.get('MAX_RETRIES', 5)
