@@ -27,43 +27,42 @@ Features
 
 * Technical
 
-    * Asyncronous and syncronous MDN
-    * Partner and Organization management
-    * Digital signatures
-    * Message encryption
-    * Secure transport (SSL)
-    * Support for SSL client authentication
-    * System task to auto clear old log entries
-    * Data compression (AS2 1.1)
-    * Multinational support: Uses Django's internationalization feature
+  - Asynchronous and Synchronous MDN
+  - Partner and Organization management
+  - Digital signatures
+  - Message encryption
+  - Secure transport (SSL)
+  - Support for SSL client authentication
+  - System task to auto clear old log entries
+  - Data compression (AS2 1.1)
+  - Multinational support: Uses Django's internationalization feature
 
 * Integration
 
-    * Easy integration to existing systems, using a partner based file system interface
-    * Daemon Process picks up data from directories when it becomes available
-    * Message post processing (scripting on receipt)
+  - Easy integration to existing systems, using a partner based file system interface
+  - Message post processing (scripting on receipt)
 
 * Monitoring
 
-    * Web interface for transaction monitoring
-    * Email event notification
+  - Web interface for transaction monitoring
+  - Email event notification
 
 * The following encryption algorithms are supported:
 
-    * Triple DES
-    * RC2-128
-    * RC4-128
-    * AES-128
-    * AES-192
-    * AES-256
+  - Triple DES
+  - RC2-128
+  - RC4-128
+  - AES-128
+  - AES-192
+  - AES-256
 
 * The following hash algorithms are supported:
 
-    * SHA-1
-    * SHA-224
-    * SHA-256
-    * SHA-384
-    * SHA-512
+  - SHA-1
+  - SHA-224
+  - SHA-256
+  - SHA-384
+  - SHA-512
 
 Documentation
 ~~~~~~~~~~~~~
