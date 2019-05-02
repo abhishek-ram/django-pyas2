@@ -1,5 +1,5 @@
 {% extends "admin/change_form.html" %}
-{% load i18n admin_urls static%}
+{% load i18n admin_urls static pyas2%}
 
 {% block title %} View Message Details{% endblock title %}
 {% block content %}
@@ -80,8 +80,7 @@
       <div class="form-row field-name">
         <div>
           <label class="required" >Message Headers:</label>
-          <textarea required="" rows="10" cols="40" class="vLargeTextField"
-                    disabled>{{ original.headers.read }}</textarea>
+          <p>{{ original.headers|readfilefield|linebreaksbr }}</p>
         </div>
       </div>
       {% if original.payload %}
