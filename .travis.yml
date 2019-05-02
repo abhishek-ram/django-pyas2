@@ -8,7 +8,7 @@ install:
   - python setup.py install
   - pip install pytest-cov pytest-django mock
 script:
-  - pytest --cov-config .coveragerc --cov=pyas2lib
+  - pytest --cov-report term --cov-config .coveragerc --cov=pyas2
 after_success:
   - pip install codecov
   - codecov
