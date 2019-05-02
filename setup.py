@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
-from setuptools import setup, find_packages
+from setuptools import setup
 
 root = os.path.abspath(os.path.dirname(__file__))
 
@@ -24,14 +24,14 @@ tests_require = [
 
 setup(
     name='django-pyas2',
-    version='1.0.0',
+    version='1.0.1',
     description='A Django app for transferring files using AS2 protocol',
     license="GNU GPL v3.0",
     long_description=README,
     author='Abhishek Ram',
     author_email='abhishek8816@gmail.com',
     url='http://github.com/abhishek-ram/django-pyas2',
-    packages=find_packages(),
+    packages=['pyas2'],
     zip_safe=False,
     include_package_data=True,
     classifiers=[
