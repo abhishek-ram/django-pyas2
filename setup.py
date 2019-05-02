@@ -4,7 +4,7 @@ from setuptools import setup
 
 root = os.path.abspath(os.path.dirname(__file__))
 
-with open(os.path.join(root, 'README.md')) as f:
+with open(os.path.join(root, 'README.rst')) as f:
     README = f.read()
 
 install_requires = [
@@ -25,7 +25,7 @@ tests_require = [
 setup(
     name='django-pyas2',
     version='1.0.1',
-    description='A Django app for transferring files using AS2 protocol',
+    description='AS2 file transfer Server built on Python and Django.',
     license="GNU GPL v3.0",
     long_description=README,
     author='Abhishek Ram',
