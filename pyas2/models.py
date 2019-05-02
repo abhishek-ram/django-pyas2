@@ -5,6 +5,7 @@ from django.core.files.base import ContentFile
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils import timezone
 from django.utils.translation import ugettext as _
 from email.parser import HeaderParser
 from pyas2lib import Mdn as As2Mdn
@@ -277,10 +278,13 @@ class MessageManager(models.Manager):
 
 
 def get_message_store(instance, filename):
+    current_date = timezone.now().strftime('%Y%m%d')
     if instance.direction == 'OUT':
-        target_dir = os.path.join('messages', '__store', 'payload', 'sent')
+        target_dir = os.path.join(
+            'messages', '__store', 'payload', 'sent', current_date)
     else:
-        target_dir = os.path.join('messages', '__store', 'payload', 'received')
+        target_dir = os.path.join(
+            'messages', '__store', 'payload', 'received', current_date)
     return '{0}/{1}'.format(target_dir, filename)
 
 
@@ -448,10 +452,13 @@ class MdnManager(models.Manager):
 
 
 def get_mdn_store(instance, filename):
+    current_date = timezone.now().strftime('%Y%m%d')
     if instance.status == 'S':
-        target_dir = os.path.join('messages', '__store', 'mdn', 'sent')
+        target_dir = os.path.join(
+            'messages', '__store', 'mdn', 'sent', current_date)
     else:
-        target_dir = os.path.join('messages', '__store', 'mdn', 'received')
+        target_dir = os.path.join(
+            'messages', '__store', 'mdn', 'received', current_date)
 
     return '{0}/{1}'.format(target_dir, filename)
 

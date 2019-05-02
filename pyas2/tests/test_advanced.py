@@ -7,6 +7,7 @@ from pyas2lib import Message as As2Message
 
 from pyas2 import settings
 from pyas2.models import Message
+from pyas2.models import Mdn
 from pyas2.models import Organization
 from pyas2.models import Partner
 from pyas2.models import PrivateKey
@@ -85,6 +86,12 @@ class AdvancedTestCases(TestCase):
             file_path = os.path.join(inbox, the_file)
             if os.path.isfile(file_path):
                 os.unlink(file_path)
+        for message in Message.objects.all():
+            message.headers.delete()
+            message.payload.delete()
+        for mdn in Mdn.objects.all():
+            mdn.headers.delete()
+            mdn.payload.delete()
 
     def test_post_send_command(self):
         """ Test that the command after successful send gets executed."""

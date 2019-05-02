@@ -83,6 +83,13 @@ class BasicServerClientTestCase(TestCase):
             if os.path.isfile(file_path):
                 os.unlink(file_path)
 
+        for message in Message.objects.all():
+            message.headers.delete()
+            message.payload.delete()
+        for mdn in Mdn.objects.all():
+            mdn.headers.delete()
+            mdn.payload.delete()
+
     def testEndpoint(self):
         """ Test if the as2 reveive endpoint is active """
 

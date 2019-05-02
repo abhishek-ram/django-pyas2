@@ -99,6 +99,9 @@ class PrivateKeyForm(forms.ModelForm):
     class Meta:
         model = PrivateKey
         fields = ['key_file', 'key_pass']
+        widgets = {
+            'key_pass': forms.PasswordInput(),
+        }
 
 
 class PublicCertificateForm(forms.ModelForm):
