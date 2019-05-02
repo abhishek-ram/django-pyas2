@@ -1,8 +1,0 @@
-include LICENSE
-include README.*
-recursive-include pyas2/static *
-recursive-include pyas2/templates *
-recursive-include pyas2/templatetags *.py
-recursive-include pyas2/management *.py
-recursive-include pyas2/migrations *.py
-recursive-include pyas2 *.py
