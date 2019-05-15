@@ -75,4 +75,3 @@ class Command(BaseCommand):
         # Delete original file if option is set
         if options['delete']:
             os.remove(options['path_to_payload'])
-        sys.exit(0)
