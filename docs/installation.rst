@@ -74,6 +74,6 @@ Run the following commands to complete the installation and start the server.
     Starting development server at http://127.0.0.1:8000/
     Quit the server with CONTROL-C.
 
-The ``pyAS2`` server is now up and running, the web UI for configuration and monitoring can be accessed at
+The ``django-pyas2`` server is now up and running, the web UI for configuration and monitoring can be accessed at
 ``http://localhost:8000/admin/pyas2/`` and the endpoint for receiving AS2 messages from your partners will be at
 ``http://localhost:8080/pyas2/as2receive``

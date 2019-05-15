@@ -4,12 +4,12 @@
    contain the root `toctree` directive.
 
 ********************************************
-pyas2: pythonic AS2 server
+django-pyas2: pythonic AS2 server
 ********************************************
 
 Release v\ |release|. (:doc:`Changelog <changelog>`)
 
-``pyAS2`` is an AS2 server/client written in python and built on the `Django framework`_.
+``django-pyas2`` is an AS2 server/client written in python and built on the `Django framework`_.
 The application supports AS2 version 1.2 as defined in the `RFC 4130`_. Our goal is to
 provide a native python library for implementing the AS2 protocol. It supports Python 2.6-2.7.
 
@@ -62,7 +62,7 @@ Features
 
 Dependencies
 ============
-* Python 3.7+
+* Python 3.5+
 * Django (1.9+)
 * requests
 * pyas2lib
@@ -74,7 +74,7 @@ Guide
 
    installation
    quickstart
-   configuration
+   detailed-guide/index
    changelog
 
 .. _`RFC 4130`: https://www.ietf.org/rfc/rfc4130.txt
