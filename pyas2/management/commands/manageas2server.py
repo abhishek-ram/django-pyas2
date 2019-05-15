@@ -41,26 +41,6 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        if options['clean']:
-            self.stdout.write(u'Cleanup maintenance process started')
-            max_archive_dt = timezone.now() - timedelta(10)
-
-            self.stdout.write(
-                'Delete all messages older than %s' % settings.MAX_ARCH_DAYS)
-            old_message = Message.objects.filter(
-                timestamp__lt=max_archive_dt).order_by('timestamp')
-            for message in old_message:
-                message.payload.delete()
-                message.headers.delete()
-
-                try:
-                    message.mdn.payload.delete()
-                    message.mdn.headers.delete()
-                    message.mdn.delete()
-                except Mdn.DoesNotExist:
-                    pass
-                message.delete()
-            self.stdout.write('Cleanup maintenance process completed')
 
         if options['retry']:
             self.stdout.write('Retrying all failed outbound messages')
@@ -126,7 +106,8 @@ class Command(BaseCommand):
                         data=pending_mdn.payload.read())
                     pending_mdn.status = 'S'
                 except requests.exceptions.RequestException as e:
-                    pass
+                    self.stdout.write('Failed to send MDN "%s", error: %s' %(
+                        pending_mdn.mdn_id, e))
                 finally:
                     pending_mdn.save()
 
@@ -152,3 +133,24 @@ class Command(BaseCommand):
                 pending_msg.save()
 
             self.stdout.write(u'Successfully processed all pending mdns.')
+
+        if options['clean']:
+            self.stdout.write(u'Cleanup maintenance process started')
+            max_archive_dt = timezone.now() - timedelta(settings.MAX_ARCH_DAYS)
+            self.stdout.write(
+                'Delete all messages older than %s' % settings.MAX_ARCH_DAYS)
+            old_message = Message.objects.filter(
+                timestamp__lt=max_archive_dt).order_by('timestamp')
+
+            for message in old_message:
+                message.payload.delete()
+                message.headers.delete()
+
+                try:
+                    message.mdn.payload.delete()
+                    message.mdn.headers.delete()
+                    message.mdn.delete()
+                except Mdn.DoesNotExist:
+                    pass
+                message.delete()
+            self.stdout.write('Cleanup maintenance process completed')
