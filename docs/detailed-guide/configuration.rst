@@ -64,5 +64,5 @@ We need to take this location into account when integrating ``django-pyas2`` wit
 
 outbox
 ------
-The outbox folder works in conjecture with the ``send-daemon`` process. The daemon process monitors all the outbox
-folder and will trigger a transfer when a file becomes available. The path of this  directory is ``{DATA DIRECTORY}/messages/{PARTNER AS2 ID}/outbox/{ORG AS2 ID}``.
+The outbox folder works in conjecture with the ``sendas2bulk`` process. The bulk process looks in all the outbox
+folder and will trigger a transfer for each file found. The path of this  directory is ``{DATA DIRECTORY}/messages/{PARTNER AS2 ID}/outbox/{ORG AS2 ID}``.

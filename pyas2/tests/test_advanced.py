@@ -424,14 +424,14 @@ class AdvancedTestCases(TestCase):
             management.call_command(
                 'sendas2message', 'as2server', 'as2client', test_message)
 
-    def test_sendmessages_command(self):
+    def test_sendbulk_command(self):
         """ Test the command for sending all files in the outbox folder """
         # Create a file for testing
         test_file = Path(os.path.join(settings.DATA_DIR, 'messages', 'as2client',
                                       'outbox', 'as2server', 'testmessage.edi'))
         test_file.touch()
         with self.assertRaises(SystemExit):
-            management.call_command('sendas2messages')
+            management.call_command('sendas2bulk')
         self.assertFalse(test_file.exists())
 
     @mock.patch('requests.post')
