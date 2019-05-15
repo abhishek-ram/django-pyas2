@@ -6,3 +6,6 @@ omit =
     # Omit the django forms and admin file
     pyas2/forms.py
     pyas2/admin.py
+
+    # Omit the template tags
+    pyas2/templatetags/pyas2.py

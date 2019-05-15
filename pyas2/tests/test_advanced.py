@@ -3,6 +3,7 @@ import os
 from django.core import management
 from django.test import Client
 from django.test import TestCase
+from pathlib import Path
 from pyas2lib import Message as As2Message
 
 from pyas2 import settings
@@ -411,7 +412,7 @@ class AdvancedTestCases(TestCase):
             'Failed to verify message signature' in out_message.detailed_status)
 
     def test_sendmessage_command(self):
-        """ Test the command for sending as2 messages """
+        """ Test the command for an sending as2 message """
         test_message = os.path.join(TEST_DIR, 'testmessage.edi')
 
         # Try to run with invalid org and client
@@ -422,6 +423,16 @@ class AdvancedTestCases(TestCase):
         with self.assertRaises(SystemExit):
             management.call_command(
                 'sendas2message', 'as2server', 'as2client', test_message)
+
+    def test_sendmessages_command(self):
+        """ Test the command for sending all files in the outbox folder """
+        # Create a file for testing
+        test_file = Path(os.path.join(settings.DATA_DIR, 'messages', 'as2client',
+                                      'outbox', 'as2server', 'testmessage.edi'))
+        test_file.touch()
+        with self.assertRaises(SystemExit):
+            management.call_command('sendas2messages')
+        self.assertFalse(test_file.exists())
 
     @mock.patch('requests.post')
     def build_and_send(self, partner, mock_request, smudge=False):
