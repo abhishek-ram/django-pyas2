@@ -24,7 +24,7 @@ tests_require = [
 
 setup(
     name='django-pyas2',
-    version='1.0.1',
+    version='1.0.2',
     description='AS2 file transfer Server built on Python and Django.',
     license="GNU GPL v3.0",
     long_description=README,

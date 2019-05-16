@@ -10,21 +10,14 @@ The ``sendas2message`` command triggers a file transfer, it takes the mandatory 
 the full path to the file to be transferred. The command can be used by other applications to integrate with ``django-pyas2``.
 
 sendas2bulk
---------------
+-----------
 The ``sendas2bulk`` command looks in the outbox folder for each partner setup on the as2 server. It then triggers a transfer for each file found in the outbox.
 
-sendasyncmdn
-------------
-The ``sendasyncmdn`` command performs two functions; it sends asynchronous MDNs for messages received from your partners and
-also checks if we have received asynchronous MDNs for sent messages so that the message status can be updated appropriately.
-The command does not take any arguments and should be run on a repeating schedule.
+manageas2server
+---------------
+The ``manageas2server`` command performs various management operation on the AS2 server. The following options are available which can either be used together or alone:
 
-retryfailedas2comms
--------------------
-The ``retryfailedas2comms`` command checks for any messages that have been set for retries and then retriggers the transfer
-for these messages. The command does not take any arguments and should be run on a repeating schedule.
+* ``--async-mdns``: This operation performs two functions; it sends asynchronous MDNs for messages received from your partners and also checks if we have received asynchronous MDNs for sent messages so that the message status can be updated appropriately.
+* ``--retry``: This operation checks for any messages that have been set for retries and then re-triggers the transfer for these messages.
+* ``--clean``: This operation deletes all messages objects and related files older that the ``MAX_ARCH_DAYS`` setting.
 
-cleanas2server
---------------
-The ``cleanas2server`` command is a maintenance command and it deletes all DB objects, logs and files older that the ``MAXARCHDAYS``
-setting. It is recommended to run this command once a day using cron or windows scheduler.
