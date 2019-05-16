@@ -16,8 +16,10 @@
       <div class="form-row field-name">
         <div>
           <label class="required" >Message:</label>
+          <p>
           <a href="{% url 'admin:pyas2_message_change' original.message_id%}">
             {{ original.message.message_id}}</a>
+          </p>
         </div>
       </div>
       <div class="form-row field-name">
@@ -29,11 +31,13 @@
       <div class="form-row field-name">
         <div>
           <label class="required" >Signed:</label>
+          <p>
           {% if original.signed %}
             <img src="{% static "admin/img/icon-yes.svg"%}" alt="Yes">
           {% else %}
             <img src="{% static "admin/img/icon-no.svg"%}" alt="No">
           {% endif %}
+          </p>
         </div>
       </div>
       <div class="form-row field-name">
