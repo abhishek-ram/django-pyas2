@@ -361,10 +361,10 @@ class Message(models.Model):
             return 'admin/img/icon-yes.svg'
         elif self.status == 'E':
             return 'admin/img/icon-no.svg'
-        elif self.status in ['W', 'P']:
-            return 'admin/img/icon-clock.sng'
+        elif self.status in ['W', 'P', 'R']:
+            return 'admin/img/icon-alert.svg'
         else:
-            return 'admin/img/icon-unknown.sng'
+            return 'admin/img/icon-unknown.svg'
 
     def send_message(self, header, payload):
         """ Send the message to the partner"""
