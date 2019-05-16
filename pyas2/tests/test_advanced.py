@@ -426,8 +426,10 @@ class AdvancedTestCases(TestCase):
     def test_sendbulk_command(self):
         """ Test the command for sending all files in the outbox folder """
         # Create a file for testing
-        test_file = Path(os.path.join(settings.DATA_DIR, 'messages', 'as2client',
-                                      'outbox', 'as2server', 'testmessage.edi'))
+        outbox_dir = os.path.join(
+            settings.DATA_DIR, 'messages', 'as2client', 'outbox', 'as2server')
+        os.makedirs(outbox_dir)
+        test_file = Path(os.path.join(outbox_dir, 'testmessage.edi'))
         test_file.touch()
 
         management.call_command('sendas2bulk')
