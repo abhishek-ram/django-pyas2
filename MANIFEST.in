@@ -1,0 +1,8 @@
+include LICENSE
+include README.rst
+include AUTHORS.md
+
+graft pyas2
+
+global-exclude .DS_Store
+global-exclude *.py[co]
