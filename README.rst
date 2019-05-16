@@ -14,11 +14,11 @@ django-pyAS2
 .. image:: https://codecov.io/gh/abhishek-ram/django-pyas2/branch/master/graph/badge.svg
   :target: https://codecov.io/gh/abhishek-ram/django-pyas2
 
-``pyAS2`` is an AS2 server/client written in python and built on the django framework.
+``django-pyas2`` is an AS2 server/client written in python and built on the django framework.
 The application supports AS2 version 1.2 as defined in the `RFC 4130`_. Our goal is to provide a native
-python library for implementing the AS2 protocol. It supports Python 2.6-2.7.
+python library for implementing the AS2 protocol. It supports Python 3.5+
 
-``pyAS2`` includes a set of django-admin commands that can be used to start the server, send files as
+``django-pyas2`` includes a set of django-admin commands that can be used to send files as
 a client, send asynchronous MDNs and so on. It also has a web based front end interface for
 configuring partners and organizations, monitoring message transfers and also initiating new transfers.
 
@@ -87,7 +87,7 @@ Contribute
 Running Tests
 ~~~~~~~~~~~~~
 
-To run ``pyAS2's`` test suite:
+To run ``django-pyas2's`` test suite:
 
 ``django-admin.py test pyas2 --settings=pyas2.test_settings --pythonpath=.``
 

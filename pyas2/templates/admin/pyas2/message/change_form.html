@@ -65,15 +65,14 @@
         <div>
           <label class="required" >Status:</label>
           <img src="{% static original.status_icon %}"
-               alt="{{ original.status }}">
+               alt="{{ original.get_status_display }}">
         </div>
       </div>
       {% if original.detailed_status %}
         <div class="form-row field-name">
           <div>
             <label class="required" >Detailed Status:</label>
-            <textarea required="" rows="10" cols="40" class="vLargeTextField"
-                      disabled>{{ original.detailed_status }}</textarea>
+            <p>{{ original.detailed_status|linebreaksbr }}</p>
           </div>
         </div>
       {% endif %}

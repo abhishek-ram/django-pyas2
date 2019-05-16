@@ -3,6 +3,7 @@ import os
 from django.core import management
 from django.test import Client
 from django.test import TestCase
+from pathlib import Path
 from pyas2lib import Message as As2Message
 
 from pyas2 import settings
@@ -74,7 +75,8 @@ class AdvancedTestCases(TestCase):
         with open(os.path.join(TEST_DIR, 'testmessage.edi'), 'rb') as fp:
             self.payload = fp.read()
 
-    def tearDown(self):
+    @classmethod
+    def tearDownClass(cls):
         # remove all files in the inbox folders
         inbox = os.path.join(
             settings.DATA_DIR, 'messages', 'as2server', 'inbox', 'as2client')
@@ -411,17 +413,76 @@ class AdvancedTestCases(TestCase):
             'Failed to verify message signature' in out_message.detailed_status)
 
     def test_sendmessage_command(self):
-        """ Test the command for sending as2 messages """
+        """ Test the command for an sending as2 message """
         test_message = os.path.join(TEST_DIR, 'testmessage.edi')
 
         # Try to run with invalid org and client
         with self.assertRaises(management.CommandError):
             management.call_command(
                 'sendas2message', 'AS2 Server', 'AS2 Client', test_message)
+        management.call_command(
+            'sendas2message', 'as2server', 'as2client', test_message)
 
-        with self.assertRaises(SystemExit):
-            management.call_command(
-                'sendas2message', 'as2server', 'as2client', test_message)
+    def test_sendbulk_command(self):
+        """ Test the command for sending all files in the outbox folder """
+        # Create a file for testing
+        outbox_dir = os.path.join(
+            settings.DATA_DIR, 'messages', 'as2client', 'outbox', 'as2server')
+        os.makedirs(outbox_dir)
+        test_file = Path(os.path.join(outbox_dir, 'testmessage.edi'))
+        test_file.touch()
+
+        management.call_command('sendas2bulk')
+        self.assertFalse(test_file.exists())
+
+    def test_manageserver_command(self):
+        """ Test the command for managing the as2 server """
+        settings.MAX_ARCH_DAYS = -1
+        # Create a message
+        as2message = As2Message(
+            sender=self.organization.as2org,
+            receiver=self.partner.as2partner)
+        as2message.build(
+            self.payload,
+            filename='testmessage.edi',
+            subject=self.partner.subject,
+            content_type=self.partner.content_type
+        )
+        out_message, _ = Message.objects.create_from_as2message(
+            as2message=as2message,
+            payload=self.payload,
+            direction='OUT',
+            status='P'
+        )
+        out_message.send_message(as2message.headers, as2message.content)
+
+        # Test the retry command
+        out_message.refresh_from_db()
+        self.assertEqual(out_message.status, 'R')
+        management.call_command('manageas2server', retry=True)
+        out_message.refresh_from_db()
+        self.assertEqual(out_message.retries, 1)
+
+        # Test max retry setting
+        settings.MAX_RETRIES = 1
+        management.call_command('manageas2server', retry=True)
+        out_message.refresh_from_db()
+        self.assertEqual(out_message.retries, 2)
+        self.assertEqual(out_message.status, 'E')
+
+        # Test the async mdn command for outbound messages
+        out_message.status = 'P'
+        out_message.save()
+        settings.ASYNC_MDN_WAIT = 0
+        management.call_command('manageas2server', async_mdns=True)
+        out_message.refresh_from_db()
+        self.assertEqual(out_message.status, 'E')
+
+        # Test the clean command
+        management.call_command('manageas2server', clean=True)
+        self.assertEqual(
+            Message.objects.filter(
+                message_id=out_message.message_id).count(), 0)
 
     @mock.patch('requests.post')
     def build_and_send(self, partner, mock_request, smudge=False):
@@ -435,17 +496,16 @@ class AdvancedTestCases(TestCase):
             subject=partner.subject,
             content_type=partner.content_type
         )
-        in_message, _ = Message.objects.create_from_as2message(
+        out_message, _ = Message.objects.create_from_as2message(
             as2message=as2message,
             payload=self.payload,
             direction='OUT',
             status='P'
         )
-
         mock_request.side_effect = SendMessageMock(self.client)
-        in_message.send_message(
+        out_message.send_message(
             as2message.headers,
             b'xxxx' + as2message.content if smudge else as2message.content
         )
 
-        return in_message
+        return out_message

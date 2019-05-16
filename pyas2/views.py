@@ -214,7 +214,7 @@ class SendAs2Message(FormView):
             status='P'
         )
         message.send_message(as2message.headers, as2message.content)
-        if message.status == 'S':
+        if message.status in ['S', 'P']:
             messages.success(
                 self.request,
                 'Message has been successfully send to Partner.'

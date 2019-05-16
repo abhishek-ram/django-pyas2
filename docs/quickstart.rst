@@ -24,7 +24,7 @@ To generate the public and private key pair use the below commands
 
 .. code-block:: console
 
-    $ openssl req -x509 -newkey rsa:2048 -keyout P1_private.pem -out P1_public.pem -days 365
+    $ openssl req -x509 -newkey rsa:2048 -sha256 -keyout P1_private.pem -out P1_public.pem -days 365
     Generating a 2048 bit RSA private key
     .....+++
     ................................................................................................+++
@@ -48,7 +48,7 @@ To generate the public and private key pair use the below commands
     Email Address []:
     $ cat P1_public.pem >> P1_private.pem
 
-    $ openssl req -x509 -newkey rsa:2048 -keyout P2_private.pem -out P2_public.pem -days 365
+    $ openssl req -x509 -newkey rsa:2048 -sha256 -keyout P2_private.pem -out P2_public.pem -days 365
     Generating a 2048 bit RSA private key
     ..............................+++
     ............................................................................................................+++
@@ -127,5 +127,5 @@ We are now read to send a file from ``P1`` to ``P2``, to do so follow these step
 
 Conclusion
 ----------
-We have successfully demonstrated the core functionality of ``pyAS2`` i.e. sending files from one system to another using
+We have successfully demonstrated the core functionality of ``django-pyas2`` i.e. sending files from one system to another using
 the AS2 protocol. For a more detailed overview of all its functionality do go through the :doc:`detailed docs<detailed-guide/index>`.

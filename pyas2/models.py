@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 import requests
+import traceback
 from django.core.files.base import ContentFile
 from django.db import models
 from django.db.models.signals import post_save
@@ -379,6 +380,8 @@ class Message(models.Model):
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
             self.status = 'R'
+            self.detailed_status = \
+                'Failed to send message, error:\n%s' % traceback.format_exc()
             self.save()
             return
 
@@ -508,13 +511,3 @@ class Mdn(models.Model):
         # Update the status of the MDN
         self.status = 'S'
         self.save()
-
-
-@receiver(post_save, sender=Organization)
-def check_org_dirs(sender, instance, created, **kwargs):
-    pass
-
-
-@receiver(post_save, sender=Partner)
-def check_partner_dirs(sender, instance, created, **kwargs):
-    pass

@@ -17,12 +17,12 @@
 
 # -- Project information -----------------------------------------------------
 
-project = 'pyAS2'
+project = 'django-pyas2'
 copyright = '2019, Abhishek Ram'
 author = 'Abhishek Ram'
 
 # The full version, including alpha/beta/rc tags
-release = '1.0.0'
+release = '1.0.2'
 
 
 # -- General configuration ---------------------------------------------------
