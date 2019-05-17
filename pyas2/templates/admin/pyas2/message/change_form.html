@@ -34,38 +34,46 @@
       <div class="form-row field-name">
         <div>
           <label class="required" >Compressed:</label>
+          <p>
           {% if original.compressed %}
             <img src="{% static "admin/img/icon-yes.svg"%}" alt="Yes">
           {% else %}
             <img src="{% static "admin/img/icon-no.svg"%}" alt="No">
           {% endif %}
+          </p>
         </div>
       </div>
       <div class="form-row field-name">
         <div>
           <label class="required" >Encrypted:</label>
+          <p>
           {% if original.encrypted %}
             <img src="{% static "admin/img/icon-yes.svg"%}" alt="Yes">
           {% else %}
             <img src="{% static "admin/img/icon-no.svg"%}" alt="No">
           {% endif %}
+          </p>
         </div>
       </div>
       <div class="form-row field-name">
         <div>
           <label class="required" >Signed:</label>
+          <p>
           {% if original.signed %}
             <img src="{% static "admin/img/icon-yes.svg"%}" alt="Yes">
           {% else %}
             <img src="{% static "admin/img/icon-no.svg"%}" alt="No">
           {% endif %}
+          </p>
         </div>
       </div>
       <div class="form-row field-name">
         <div>
           <label class="required" >Status:</label>
+          <p>
           <img src="{% static original.status_icon %}"
-               alt="{{ original.get_status_display }}">
+               alt="{{ original.get_status_display }}">{{ original.get_status_display }}
+          </p>
         </div>
       </div>
       {% if original.detailed_status %}
@@ -86,8 +94,10 @@
         <div class="form-row field-name">
           <div>
             <label class="required" >Message Payload:</label>
+            <p>
             <a class="button" href="{% url "download-file" "message_payload" original.id %}">
               Download File</a>
+            </p>
           </div>
         </div>
       {% endif %}

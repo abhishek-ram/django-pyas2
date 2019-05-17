@@ -1,13 +1,13 @@
 Release History
 ===============
 
-1.0.2 - 2018-05-16
+1.0.2 - 2019-05-16
 ------------------
 
 * Add command `sendas2bulk` for sending messages in the outbox folders.
 * Add command `manageas2server` for cleanup, async mdns and retries.
 
-1.0.1 - 2018-05-02
+1.0.1 - 2019-05-02
 ------------------
 
 * Use current date as sub-folder in message store
