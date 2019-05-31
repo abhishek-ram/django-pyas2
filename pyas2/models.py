@@ -403,7 +403,7 @@ class Message(models.Model):
         else:
             return 'admin/img/icon-unknown.svg'
 
-    def send_message(self, header, payload, verify_ssl=True):
+    def send_message(self, header, payload):
         """ Send the message to the partner"""
         # Set up the http auth if specified in the partner profile
         auth = None
@@ -413,7 +413,7 @@ class Message(models.Model):
         # Send the message to the partner
         try:
             response = requests.post(
-                self.partner.target_url, auth=auth, headers=header, data=payload, verify=verify_ssl)
+                self.partner.target_url, auth=auth, headers=header, data=payload, verify=self.partner.https_verify_ssl)
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
             self.status = 'R'
