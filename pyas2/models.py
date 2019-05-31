@@ -158,6 +158,9 @@ class Partner(models.Model):
         verbose_name=_('Enable Authentication'), default=False)
     http_auth_user = models.CharField(max_length=100, null=True, blank=True)
     http_auth_pass = models.CharField(max_length=100, null=True, blank=True)
+    https_verify_ssl = models.BooleanField(
+        verbose_name=_('Verify SSL Certificate'), default=True,
+        help_text=_('Uncheck this option to disable SSL certificate verification to HTTPS.'))
 
     target_url = models.URLField()
     subject = models.CharField(
@@ -400,7 +403,7 @@ class Message(models.Model):
         else:
             return 'admin/img/icon-unknown.svg'
 
-    def send_message(self, header, payload):
+    def send_message(self, header, payload, verify_ssl=True):
         """ Send the message to the partner"""
         # Set up the http auth if specified in the partner profile
         auth = None
@@ -410,7 +413,7 @@ class Message(models.Model):
         # Send the message to the partner
         try:
             response = requests.post(
-                self.partner.target_url, auth=auth, headers=header, data=payload)
+                self.partner.target_url, auth=auth, headers=header, data=payload, verify=verify_ssl)
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
             self.status = 'R'

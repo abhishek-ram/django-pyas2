@@ -60,7 +60,7 @@ class PartnerAdmin(admin.ModelAdmin):
         }),
         ('Http Authentication', {
             'classes': ('collapse', 'wide'),
-            'fields': ('http_auth', 'http_auth_user', 'http_auth_pass')
+            'fields': ('http_auth', 'http_auth_user', 'http_auth_pass', 'https_verify_ssl')
         }),
         ('Security Settings', {
             'classes': ('collapse', 'wide'),
