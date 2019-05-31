@@ -19,6 +19,10 @@ from pyas2 import settings
 from pyas2.utils import run_post_send
 from pyas2.utils import store_file
 
+from pyas2lib.utils import pem_to_der
+from OpenSSL import crypto
+from datetime import datetime
+
 
 class PrivateKey(models.Model):
     name = models.CharField(max_length=255)
@@ -38,6 +42,36 @@ class PublicCertificate(models.Model):
     verify_cert = models.BooleanField(
         verbose_name=_('Verify Certificate'), default=True,
         help_text=_('Uncheck this option to disable certificate verification.'))
+
+    certificate_valid_from = models.DateTimeField(null=True, blank=True)
+    certificate_valid_to = models.DateTimeField(null=True, blank=True)
+
+    def extract_info(self):
+        '''
+        Extract validity information from the certificate and return a dictionnary
+        '''
+
+        der = pem_to_der(self.certificate)
+        cert = crypto.load_certificate(crypto.FILETYPE_ASN1, der[0])
+
+        cert_info = {'valid_from': None,
+                     'valid_to': None}
+
+        if der:
+            cert_info['valid_from'] = datetime.strptime(cert.get_notBefore().decode('utf8'), "%Y%m%d%H%M%SZ")
+            cert_info['valid_to'] = datetime.strptime(cert.get_notAfter().decode('utf8'), "%Y%m%d%H%M%SZ")
+            cert_info['subject'] = [tuple(item.decode('utf8') for item in sets)
+                                    for sets in cert.get_subject().get_components()]
+            cert_info['issuer'] = [tuple(item.decode('utf8') for item in sets)
+                                    for sets in cert.get_issuer().get_components()]
+
+        return cert_info
+
+    def save(self, *args, **kwargs):
+        cert_info = self.extract_info()
+        self.certificate_valid_from = cert_info['valid_from']
+        self.certificate_valid_to = cert_info['valid_to']
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name

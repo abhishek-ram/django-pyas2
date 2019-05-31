@@ -33,7 +33,7 @@ class PrivateKeyAdmin(admin.ModelAdmin):
 @admin.register(PublicCertificate)
 class PublicCertificateAdmin(admin.ModelAdmin):
     form = PublicCertificateForm
-    list_display = ('name', 'download_cert',)
+    list_display = ('name', 'download_cert', 'certificate_valid_from', 'certificate_valid_to')
 
     def download_cert(self, obj):
         download_url = reverse_lazy('download-file',
