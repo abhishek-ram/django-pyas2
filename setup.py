@@ -11,7 +11,7 @@ install_requires = [
     'pyas2lib==1.1.0',
     'django>=1.10.0',
     'requests',
-    'pyOpenSSL'
+    'pyOpenSSL==17.5.0'
 ]
 
 tests_require = [
