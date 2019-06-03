@@ -13,45 +13,13 @@ from pyas2lib import Mdn as As2Mdn
 from pyas2lib import Message as As2Message
 from pyas2lib import Organization as As2Organization
 from pyas2lib import Partner as As2Partner
+
 from uuid import uuid4
 
 from pyas2 import settings
 from pyas2.utils import run_post_send
 from pyas2.utils import store_file
-
-from pyas2lib.utils import pem_to_der
-from OpenSSL import crypto
-from datetime import datetime
-
-
-def extract_certificate_info(certificate):
-    '''
-    Extract validity information from the certificate and return a dictionary
-    '''
-
-    der = pem_to_der(certificate)
-    cert = None
-
-    for item in der:
-        try:
-            cert = crypto.load_certificate(crypto.FILETYPE_ASN1, item)
-            break
-        except crypto.Error:
-            continue
-
-    cert_info = {'valid_from': None,
-                 'valid_to': None}
-
-    if cert:
-        cert_info['valid_from'] = datetime.strptime(cert.get_notBefore().decode('utf8'), "%Y%m%d%H%M%SZ")
-        cert_info['valid_to'] = datetime.strptime(cert.get_notAfter().decode('utf8'), "%Y%m%d%H%M%SZ")
-        cert_info['subject'] = [tuple(item.decode('utf8') for item in sets)
-                                for sets in cert.get_subject().get_components()]
-        cert_info['issuer'] = [tuple(item.decode('utf8') for item in sets)
-                               for sets in cert.get_issuer().get_components()]
-        cert_info['serial'] = cert.get_serial_number()
-
-    return cert_info
+from pyas2lib.utils import extract_certificate_info
 
 
 class PrivateKey(models.Model):
@@ -61,11 +29,14 @@ class PrivateKey(models.Model):
         max_length=100, verbose_name='Private Key Password')
     valid_from = models.DateTimeField(null=True, blank=True)
     valid_to = models.DateTimeField(null=True, blank=True)
+    serial_number = models.CharField(max_length=64, null=True, blank=True)
 
     def save(self, *args, **kwargs):
         cert_info = extract_certificate_info(self.key)
         self.valid_from = cert_info['valid_from']
         self.valid_to = cert_info['valid_to']
+        if not cert_info['serial'] is None:
+            self.serial_number = cert_info['serial'].__str__()
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -82,11 +53,14 @@ class PublicCertificate(models.Model):
         help_text=_('Uncheck this option to disable certificate verification.'))
     valid_from = models.DateTimeField(null=True, blank=True)
     valid_to = models.DateTimeField(null=True, blank=True)
+    serial_number = models.CharField(max_length=64, null=True, blank=True)
 
     def save(self, *args, **kwargs):
         cert_info = extract_certificate_info(self.certificate)
         self.valid_from = cert_info['valid_from']
         self.valid_to = cert_info['valid_to']
+        if not cert_info['serial'] is None:
+            self.serial_number = cert_info['serial'].__str__()
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -429,7 +403,8 @@ class Message(models.Model):
         # Send the message to the partner
         try:
             response = requests.post(
-                self.partner.target_url, auth=auth, headers=header, data=payload, verify=self.partner.https_verify_ssl)
+                self.partner.target_url, auth=auth, headers=header, data=payload,
+                verify=self.partner.https_verify_ssl)
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
             self.status = 'R'

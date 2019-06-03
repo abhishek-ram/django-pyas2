@@ -18,7 +18,7 @@ from pyas2.forms import PrivateKeyForm
 @admin.register(PrivateKey)
 class PrivateKeyAdmin(admin.ModelAdmin):
     form = PrivateKeyForm
-    list_display = ('name', 'download_key','valid_from', 'valid_to')
+    list_display = ('name', 'download_key', 'valid_from', 'valid_to', 'serial')
 
     def download_key(self, obj):
         download_url = reverse_lazy('download-file',
@@ -33,7 +33,7 @@ class PrivateKeyAdmin(admin.ModelAdmin):
 @admin.register(PublicCertificate)
 class PublicCertificateAdmin(admin.ModelAdmin):
     form = PublicCertificateForm
-    list_display = ('name', 'download_cert', 'valid_from', 'valid_to')
+    list_display = ('name', 'download_cert', 'valid_from', 'valid_to', 'serial')
 
     def download_cert(self, obj):
         download_url = reverse_lazy('download-file',

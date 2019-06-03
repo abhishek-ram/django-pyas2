@@ -10,8 +10,7 @@ with open(os.path.join(root, 'README.rst')) as f:
 install_requires = [
     'pyas2lib==1.1.0',
     'django>=1.10.0',
-    'requests',
-    'pyOpenSSL==17.5.0'
+    'requests'
 ]
 
 tests_require = [
