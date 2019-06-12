@@ -26,9 +26,9 @@ Include the pyAS2 URL configuration in your project's ``urls.py``.
 
 .. code-block:: python
 
-  from django.conf.urls import include
-  url(r'^pyas2/', include('pyas2.urls')),
+  from django.conf.urls import include, path
 
+  path('pyas2/', include('pyas2.urls')),
 
 Run the following commands to complete the installation and start the server.
 
