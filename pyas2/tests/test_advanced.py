@@ -428,7 +428,10 @@ class AdvancedTestCases(TestCase):
         # Create a file for testing
         outbox_dir = os.path.join(
             settings.DATA_DIR, 'messages', 'as2client', 'outbox', 'as2server')
-        os.makedirs(outbox_dir)
+        try:
+            os.makedirs(outbox_dir)
+        except FileExistsError:
+            pass
         test_file = Path(os.path.join(outbox_dir, 'testmessage.edi'))
         test_file.touch()
 
