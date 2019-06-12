@@ -71,16 +71,14 @@ class ReceiveAs2Message(View):
         as2headers = ''
         for key in request.META:
             if key.startswith('HTTP') or key.startswith('CONTENT'):
-                as2headers += '%s: %s\n' % (
-                    key.replace("HTTP_", "").replace("_", "-").lower(),
-                    request.META[key]
-                )
+                as2headers += f'{key.replace("HTTP_", "").replace("_", "-").lower()}: ' \
+                              f'{request.META[key]}\n'
 
         # build the body along with the headers
         request_body = as2headers.encode() + b'\r\n' + request.body
         logger.debug(
-            'Received an HTTP POST from {} with payload :\n{}'.format(
-                request.META['REMOTE_ADDR'],  request_body)
+            f'Received an HTTP POST from {request.META["REMOTE_ADDR"]} '
+            f'with payload :\n{request_body}'
         )
 
         # First try to see if this is an MDN
@@ -89,17 +87,11 @@ class ReceiveAs2Message(View):
             as2mdn = As2Mdn()
 
             # Parse the mdn and get the message status
-            status, detailed_status = as2mdn.parse(
-                request_body, self.find_message)
-            message = Message.objects.get(
-                message_id=as2mdn.orig_message_id,
-                direction='OUT',
-            )
+            status, detailed_status = as2mdn.parse(request_body, self.find_message)
+            message = Message.objects.get(message_id=as2mdn.orig_message_id, direction='OUT')
             logger.info(
-                'Asynchronous MDN received for AS2 message {} to organization '
-                '{} from partner {}'.format(as2mdn.message_id,
-                                            message.organization.as2_name,
-                                            message.partner.as2_name))
+                f'Asynchronous MDN received for AS2 message {as2mdn.message_id} to organization '
+                f'{message.organization.as2_name} from partner {message.partner.as2_name}')
 
             # Update the message status and return the response
             if status == 'processed':
@@ -107,12 +99,10 @@ class ReceiveAs2Message(View):
                 run_post_send(message)
             else:
                 message.status = 'E'
-                message.detailed_status = \
-                    'Partner failed to process message: %s' % detailed_status
+                message.detailed_status = f'Partner failed to process message: {detailed_status}'
             # Save the message and create the mdn
             message.save()
-            Mdn.objects.create_from_as2mdn(
-                as2mdn=as2mdn, message=message, status='R')
+            Mdn.objects.create_from_as2mdn(as2mdn=as2mdn, message=message, status='R')
 
             return HttpResponse(_('AS2 ASYNC MDN has been received'))
 
@@ -120,15 +110,12 @@ class ReceiveAs2Message(View):
             logger.debug('Payload is not an MDN parse it as an AS2 Message')
             as2message = As2Message()
             status, exception, as2mdn = as2message.parse(
-                request_body, self.find_organization, self.find_partner,
-                self.check_message_exists
-            )
+                request_body, self.find_organization, self.find_partner, self.check_message_exists)
+
             logger.info(
-                'Received an AS2 message with id {} for organization {} from '
-                'partner {}'.format(
-                    as2message.headers.get('message-id'),
-                    as2message.headers.get('as2-to'),
-                    as2message.headers.get('as2-from'))
+                f'Received an AS2 message with id {as2message.headers.get("message-id")} for '
+                f'organization {as2message.headers.get("as2-to")} from '
+                f'partner {as2message.headers.get("as2-from")}.'
             )
 
             # In case of duplicates update message id
@@ -155,19 +142,17 @@ class ReceiveAs2Message(View):
                 response = HttpResponse(as2mdn.content)
                 for key, value in as2mdn.headers.items():
                     response[key] = value
-
                 return response
+
             elif as2mdn and as2mdn.mdn_mode == 'ASYNC':
                 Mdn.objects.create_from_as2mdn(
-                    as2mdn=as2mdn, message=message, status='P',
-                    return_url=as2mdn.mdn_url)
+                    as2mdn=as2mdn, message=message, status='P', return_url=as2mdn.mdn_url)
             return HttpResponse(_('AS2 message has been received'))
 
     def get(self, request, *args, **kwargs):
         """"""
         return HttpResponse(
-            _('To submit an AS2 message, you must POST the message to this URL')
-        )
+            _('To submit an AS2 message, you must POST the message to this URL'))
 
     def options(self, request, *args, **kwargs):
         response = HttpResponse()
@@ -178,8 +163,8 @@ class ReceiveAs2Message(View):
 class SendAs2Message(FormView):
     template_name = 'pyas2/send_as2_message.html'
     form_class = SendAs2MessageForm
-    success_url = reverse_lazy('admin:%s_%s_changelist' % (
-        Partner._meta.app_label, Partner._meta.model_name))
+    success_url = reverse_lazy(
+        f'admin:{Partner._meta.app_label}_{ Partner._meta.model_name}_changelist')
 
     def get_context_data(self, **kwargs):
         context = super(SendAs2Message, self).get_context_data(**kwargs)
@@ -199,7 +184,8 @@ class SendAs2Message(FormView):
         payload = form.cleaned_data['file'].read()
         as2message = As2Message(
             sender=form.cleaned_data['organization'].as2org,
-            receiver=form.cleaned_data['partner'].as2partner)
+            receiver=form.cleaned_data['partner'].as2partner
+        )
         as2message.build(
             payload,
             filename=form.cleaned_data['file'].name,
@@ -216,14 +202,10 @@ class SendAs2Message(FormView):
         message.send_message(as2message.headers, as2message.content)
         if message.status in ['S', 'P']:
             messages.success(
-                self.request,
-                'Message has been successfully send to Partner.'
-            )
+                self.request,'Message has been successfully send to Partner.')
         else:
             messages.error(
-                self.request,
-                'Message transmission failed, check Messages tab for details.'
-            )
+                self.request, 'Message transmission failed, check Messages tab for details.')
         return super(SendAs2Message, self).form_valid(form)
 
 
@@ -258,8 +240,7 @@ class DownloadFile(View):
         if filename and file_content:
             response = HttpResponse(content_type='application/x-pem-file')
             disposition_type = 'attachment'
-            response['Content-Disposition'] = \
-                disposition_type + '; filename=' + filename
+            response['Content-Disposition'] = disposition_type + '; filename=' + filename
             response.write(file_content)
             return response
         else:
