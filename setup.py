@@ -8,7 +8,7 @@ with open(os.path.join(root, 'README.rst')) as f:
     README = f.read()
 
 install_requires = [
-    'pyas2lib==1.1.0',
+    'pyas2lib==1.1.1',
     'django>=1.10.0',
     'requests'
 ]

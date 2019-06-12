@@ -89,7 +89,7 @@ Running Tests
 
 To run ``django-pyas2's`` test suite:
 
-``django-admin.py test pyas2 --settings=pyas2.test_settings --pythonpath=.``
+``django-admin.py test pyas2 --settings=example.settings --pythonpath=.``
 
 License
 ~~~~~~~
