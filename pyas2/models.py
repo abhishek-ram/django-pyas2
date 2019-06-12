@@ -13,11 +13,13 @@ from pyas2lib import Mdn as As2Mdn
 from pyas2lib import Message as As2Message
 from pyas2lib import Organization as As2Organization
 from pyas2lib import Partner as As2Partner
+
 from uuid import uuid4
 
 from pyas2 import settings
 from pyas2.utils import run_post_send
 from pyas2.utils import store_file
+from pyas2lib.utils import extract_certificate_info
 
 
 class PrivateKey(models.Model):
@@ -25,6 +27,17 @@ class PrivateKey(models.Model):
     key = models.BinaryField()
     key_pass = models.CharField(
         max_length=100, verbose_name='Private Key Password')
+    valid_from = models.DateTimeField(null=True, blank=True)
+    valid_to = models.DateTimeField(null=True, blank=True)
+    serial_number = models.CharField(max_length=64, null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        cert_info = extract_certificate_info(self.key)
+        self.valid_from = cert_info['valid_from']
+        self.valid_to = cert_info['valid_to']
+        if not cert_info['serial'] is None:
+            self.serial_number = cert_info['serial'].__str__()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
@@ -38,6 +51,17 @@ class PublicCertificate(models.Model):
     verify_cert = models.BooleanField(
         verbose_name=_('Verify Certificate'), default=True,
         help_text=_('Uncheck this option to disable certificate verification.'))
+    valid_from = models.DateTimeField(null=True, blank=True)
+    valid_to = models.DateTimeField(null=True, blank=True)
+    serial_number = models.CharField(max_length=64, null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        cert_info = extract_certificate_info(self.certificate)
+        self.valid_from = cert_info['valid_from']
+        self.valid_to = cert_info['valid_to']
+        if not cert_info['serial'] is None:
+            self.serial_number = cert_info['serial'].__str__()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
@@ -124,6 +148,9 @@ class Partner(models.Model):
         verbose_name=_('Enable Authentication'), default=False)
     http_auth_user = models.CharField(max_length=100, null=True, blank=True)
     http_auth_pass = models.CharField(max_length=100, null=True, blank=True)
+    https_verify_ssl = models.BooleanField(
+        verbose_name=_('Verify SSL Certificate'), default=True,
+        help_text=_('Uncheck this option to disable SSL certificate verification to HTTPS.'))
 
     target_url = models.URLField()
     subject = models.CharField(
@@ -361,10 +388,10 @@ class Message(models.Model):
             return 'admin/img/icon-yes.svg'
         elif self.status == 'E':
             return 'admin/img/icon-no.svg'
-        elif self.status in ['W', 'P']:
-            return 'admin/img/icon-clock.sng'
+        elif self.status in ['W', 'P', 'R']:
+            return 'admin/img/icon-alert.svg'
         else:
-            return 'admin/img/icon-unknown.sng'
+            return 'admin/img/icon-unknown.svg'
 
     def send_message(self, header, payload):
         """ Send the message to the partner"""
@@ -376,7 +403,8 @@ class Message(models.Model):
         # Send the message to the partner
         try:
             response = requests.post(
-                self.partner.target_url, auth=auth, headers=header, data=payload)
+                self.partner.target_url, auth=auth, headers=header, data=payload,
+                verify=self.partner.https_verify_ssl)
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
             self.status = 'R'
