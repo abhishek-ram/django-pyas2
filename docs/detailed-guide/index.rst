@@ -15,3 +15,5 @@ certificates; sending messages and MDNs; monitoring messages and MDNs; and usage
     sendreceive-messages
     sendreceive-mdns
     admin-commands
+    docker
+    extending
