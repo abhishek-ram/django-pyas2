@@ -316,7 +316,6 @@ class AdvancedTestCases(TestCase):
         partner = Partner.objects.create(
             name='AS2 Server', as2_name='as2server',
             target_url='http://localhost:8080/pyas2/as2receive',
-            # signature='sha1',
             signature_cert=self.server_crt,
             encryption='tripledes_192_cbc',
             encryption_cert=self.server_crt,

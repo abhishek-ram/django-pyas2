@@ -18,7 +18,7 @@ from pyas2.forms import PrivateKeyForm
 @admin.register(PrivateKey)
 class PrivateKeyAdmin(admin.ModelAdmin):
     form = PrivateKeyForm
-    list_display = ('name', 'download_key', 'valid_from', 'valid_to', 'serial_number')
+    list_display = ('name', 'valid_from', 'valid_to', 'serial_number', 'download_key')
 
     def download_key(self, obj):
         download_url = reverse_lazy('download-file',
@@ -33,7 +33,7 @@ class PrivateKeyAdmin(admin.ModelAdmin):
 @admin.register(PublicCertificate)
 class PublicCertificateAdmin(admin.ModelAdmin):
     form = PublicCertificateForm
-    list_display = ('name', 'download_cert', 'valid_from', 'valid_to', 'serial_number')
+    list_display = ('name', 'valid_from', 'valid_to', 'serial_number', 'download_cert')
 
     def download_cert(self, obj):
         download_url = reverse_lazy('download-file',
@@ -100,24 +100,30 @@ class MessageAdmin(admin.ModelAdmin):
 
     search_fields = ('message_id',)
 
-    list_filter = ('direction', 'status', 'organization__as2_name',
-                   'partner__as2_name')
+    list_filter = ('direction', 'status', 'organization__as2_name', 'partner__as2_name')
 
     list_display = ['message_id', 'timestamp', 'status', 'direction',
                     'organization', 'partner', 'compressed', 'encrypted',
-                    'signed', 'mdn_url']
+                    'signed', 'mdn_url', 'download_file']
 
     def mdn_url(self, obj):
         if hasattr(obj, 'mdn'):
             view_url = reverse_lazy(
-                'admin:%s_%s_change' % (Mdn._meta.app_label,
-                                        Mdn._meta.model_name),
+                'admin:%s_%s_change' % (Mdn._meta.app_label, Mdn._meta.model_name),
                 args=[obj.mdn.id])
-            return format_html('<a href="{}" class="button">View MDN</a>',
-                               view_url)
+            return format_html('<a href="{}" class="button">View MDN</a>', view_url)
 
     mdn_url.allow_tags = True
     mdn_url.short_description = "MDN"
+
+    def download_file(self, obj):
+        if obj.payload:
+            view_url = reverse_lazy(
+                'download-file', args=['message_payload', obj.id])
+            return format_html('<a href="{}" class="button">Download</a>', view_url)
+
+    download_file.allow_tags = True
+    download_file.short_description = "Download Payload"
 
 
 @admin.register(Mdn)
