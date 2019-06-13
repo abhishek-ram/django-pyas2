@@ -125,6 +125,7 @@ class ReceiveAs2Message(View):
             # Create the Message and MDN objects
             message, full_fn = Message.objects.create_from_as2message(
                 as2message=as2message,
+                filename=as2message.payload.get_filename(),
                 payload=as2message.content,
                 direction='IN',
                 status='S' if status == 'processed' else 'E',
@@ -164,7 +165,7 @@ class SendAs2Message(FormView):
     template_name = 'pyas2/send_as2_message.html'
     form_class = SendAs2MessageForm
     success_url = reverse_lazy(
-        f'admin:{Partner._meta.app_label}_{ Partner._meta.model_name}_changelist')
+        f'admin:{Message._meta.app_label}_{Message._meta.model_name}_changelist')
 
     def get_context_data(self, **kwargs):
         context = super(SendAs2Message, self).get_context_data(**kwargs)
@@ -196,13 +197,14 @@ class SendAs2Message(FormView):
         message, _ = Message.objects.create_from_as2message(
             as2message=as2message,
             payload=payload,
+            filename=form.cleaned_data['file'].name,
             direction='OUT',
             status='P'
         )
         message.send_message(as2message.headers, as2message.content)
         if message.status in ['S', 'P']:
             messages.success(
-                self.request,'Message has been successfully send to Partner.')
+                self.request, 'Message has been successfully send to Partner.')
         else:
             messages.error(
                 self.request, 'Message transmission failed, check Messages tab for details.')
