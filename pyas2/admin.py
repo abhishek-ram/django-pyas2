@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import os
+
 from django.contrib import admin
 from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
@@ -18,7 +20,7 @@ from pyas2.forms import PrivateKeyForm
 @admin.register(PrivateKey)
 class PrivateKeyAdmin(admin.ModelAdmin):
     form = PrivateKeyForm
-    list_display = ('name', 'download_key', 'valid_from', 'valid_to', 'serial_number')
+    list_display = ('name', 'valid_from', 'valid_to', 'serial_number', 'download_key')
 
     def download_key(self, obj):
         download_url = reverse_lazy('download-file',
@@ -33,7 +35,7 @@ class PrivateKeyAdmin(admin.ModelAdmin):
 @admin.register(PublicCertificate)
 class PublicCertificateAdmin(admin.ModelAdmin):
     form = PublicCertificateForm
-    list_display = ('name', 'download_cert', 'valid_from', 'valid_to', 'serial_number')
+    list_display = ('name', 'valid_from', 'valid_to', 'serial_number', 'download_cert')
 
     def download_cert(self, obj):
         download_url = reverse_lazy('download-file',
@@ -98,26 +100,30 @@ class MessageAdmin(admin.ModelAdmin):
     def has_add_permission(self, request):
         return False
 
-    search_fields = ('message_id',)
+    search_fields = ('message_id', 'payload')
 
-    list_filter = ('direction', 'status', 'organization__as2_name',
-                   'partner__as2_name')
+    list_filter = ('direction', 'status', 'organization__as2_name', 'partner__as2_name')
 
     list_display = ['message_id', 'timestamp', 'status', 'direction',
                     'organization', 'partner', 'compressed', 'encrypted',
-                    'signed', 'mdn_url']
+                    'signed', 'download_file', 'mdn_url']
 
     def mdn_url(self, obj):
         if hasattr(obj, 'mdn'):
             view_url = reverse_lazy(
-                'admin:%s_%s_change' % (Mdn._meta.app_label,
-                                        Mdn._meta.model_name),
-                args=[obj.mdn.id])
-            return format_html('<a href="{}" class="button">View MDN</a>',
-                               view_url)
+                f'admin:{Mdn._meta.app_label}_{Mdn._meta.model_name}_change', args=[obj.mdn.id])
+            return format_html('<a href="{}" class="">{}</a>', view_url, obj.mdn.mdn_id)
 
     mdn_url.allow_tags = True
     mdn_url.short_description = "MDN"
+
+    def download_file(self, obj):
+        if obj.payload:
+            view_url = reverse_lazy('download-file', args=['message_payload', obj.id])
+            return format_html('<a href="{}">{}</a>', view_url, os.path.basename(obj.payload.name))
+
+    download_file.allow_tags = True
+    download_file.short_description = "Payload"
 
 
 @admin.register(Mdn)

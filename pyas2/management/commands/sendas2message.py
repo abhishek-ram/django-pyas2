@@ -1,6 +1,6 @@
 import logging
 import os
-import sys
+
 from django.core.management.base import BaseCommand
 from django.core.management.base import CommandError
 from pyas2lib import Message as AS2Message
@@ -37,36 +37,37 @@ class Command(BaseCommand):
                 as2_name=options['org_as2name'])
         except Organization.DoesNotExist:
             raise CommandError(
-                'Organization "%s" does not exist' % options['org_as2name'])
+                f'Organization "{options["org_as2name"]}" does not exist')
         try:
             partner = Partner.objects.get(as2_name=options['partner_as2name'])
         except Partner.DoesNotExist:
             raise CommandError(
-                'Partner "%s" does not exist' % options['partner_as2name'])
+                f'Partner "{options["partner_as2name"]}" does not exist')
 
         # Check if file exists and we have the right permissions
         if not os.path.isfile(options['path_to_payload']):
-            raise CommandError('Payload at location "%s" does not '
-                               'exist.' % options['path_to_payload'])
+            raise CommandError(
+                f'Payload at location "{options["path_to_payload"]}" does not exist.')
 
         if options['delete'] and not os.access(options['path_to_payload'], os.W_OK):
-            raise CommandError('Insufficient file permission for '
-                               'payload %s.' % options['path_to_payload'])
+            raise CommandError(
+                f'Insufficient file permission for payload {options["path_to_payload"]}.')
 
         # Build and send the AS2 message
+        original_filename = os.path.basename(options['path_to_payload'])
         with open(options['path_to_payload'], 'rb') as in_file:
             payload = in_file.read()
-            as2message = AS2Message(
-                sender=org.as2org, receiver=partner.as2partner)
+            as2message = AS2Message(sender=org.as2org, receiver=partner.as2partner)
             as2message.build(
                 payload,
-                filename=os.path.basename(options['path_to_payload']),
+                filename=original_filename,
                 subject=partner.subject,
                 content_type=partner.content_type
             )
         message, _ = Message.objects.create_from_as2message(
             as2message=as2message,
             payload=payload,
+            filename=original_filename,
             direction='OUT',
             status='P'
         )

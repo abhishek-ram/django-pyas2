@@ -11,7 +11,7 @@ Release v\ |release|. (:doc:`Changelog <changelog>`)
 
 ``django-pyas2`` is an AS2 server/client written in python and built on the `Django framework`_.
 The application supports AS2 version 1.2 as defined in the `RFC 4130`_. Our goal is to
-provide a native python library for implementing the AS2 protocol. It supports Python 2.6-2.7.
+provide a native python library for implementing the AS2 protocol. It supports Python 3.6+.
 
 The application includes a server for receiving files from partners,  a front-end web interface for
 configuration and monitoring, a set of ``django-admin`` commands that serves as a client
@@ -62,7 +62,7 @@ Features
 
 Dependencies
 ============
-* Python 3.5+
+* Python 3.6+
 * Django (1.9+)
 * requests
 * pyas2lib

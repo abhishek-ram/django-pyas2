@@ -8,8 +8,8 @@ with open(os.path.join(root, 'README.rst')) as f:
     README = f.read()
 
 install_requires = [
-    'pyas2lib==1.1.1',
-    'django>=1.10.0',
+    'pyas2lib==1.2.0',
+    'django>=2.1.9',
     'requests'
 ]
 
@@ -24,7 +24,7 @@ tests_require = [
 
 setup(
     name='django-pyas2',
-    version='1.0.2',
+    version='1.1.0',
     description='AS2 file transfer Server built on Python and Django.',
     license="GNU GPL v3.0",
     long_description=README,
@@ -41,7 +41,6 @@ setup(
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
         'Operating System :: OS Independent',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         "Topic :: Security :: Cryptography",
