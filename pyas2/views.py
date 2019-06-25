@@ -82,12 +82,13 @@ class ReceiveAs2Message(View):
         )
 
         # First try to see if this is an MDN
-        try:
-            logger.debug('Check to see if payload is an Asynchronous MDN.')
-            as2mdn = As2Mdn()
+        logger.debug('Check to see if payload is an Asynchronous MDN.')
+        as2mdn = As2Mdn()
 
-            # Parse the mdn and get the message status
-            status, detailed_status = as2mdn.parse(request_body, self.find_message)
+        # Parse the mdn and get the message status
+        status, detailed_status = as2mdn.parse(request_body, self.find_message)
+
+        if not detailed_status == 'mdn-not-found':
             message = Message.objects.get(message_id=as2mdn.orig_message_id, direction='OUT')
             logger.info(
                 f'Asynchronous MDN received for AS2 message {as2mdn.message_id} to organization '
@@ -106,7 +107,7 @@ class ReceiveAs2Message(View):
 
             return HttpResponse(_('AS2 ASYNC MDN has been received'))
 
-        except MDNNotFound:
+        else:
             logger.debug('Payload is not an MDN parse it as an AS2 Message')
             as2message = As2Message()
             status, exception, as2mdn = as2message.parse(
@@ -187,6 +188,8 @@ class SendAs2Message(FormView):
             sender=form.cleaned_data['organization'].as2org,
             receiver=form.cleaned_data['partner'].as2partner
         )
+        logger.debug(f'Building message from {form.cleaned_data["file"].name} to send to partner '
+                     f'{as2message.receiver.as2_name} from org {as2message.sender.as2_name}.')
         as2message.build(
             payload,
             filename=form.cleaned_data['file'].name,

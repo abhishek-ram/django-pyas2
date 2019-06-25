@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import logging
 import os
 import traceback
 from email.parser import HeaderParser
@@ -21,6 +22,8 @@ from pyas2lib.utils import extract_certificate_info
 from pyas2 import settings
 from pyas2.utils import run_post_send
 from pyas2.utils import store_file
+
+logger = logging.getLogger('pyas2')
 
 
 class PrivateKey(models.Model):
@@ -366,6 +369,9 @@ class Message(models.Model):
 
     def send_message(self, header, payload):
         """ Send the message to the partner"""
+        logger.info(f'Sending message {self.message_id} from organization "{self.organization}" '
+                    f'to partner "{self.partner}".')
+
         # Set up the http auth if specified in the partner profile
         auth = None
         if self.partner.http_auth:
@@ -402,6 +408,8 @@ class Message(models.Model):
                 mdn_content = mdn_content.encode('utf-8') + response.content
 
                 # Parse the as2 mdn received
+                logger.debug(f'Received MDN response for message {self.message_id} '
+                             f'with content: {mdn_content}')
                 as2mdn = As2Mdn()
                 status, detailed_status = as2mdn.parse(mdn_content, lambda x, y: self.as2message)
 
