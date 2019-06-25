@@ -49,7 +49,7 @@ Then build and run the container from the command line as follows:
 
 .. code-block:: console
 
-    docker build -t docker_pyas2 . && docker run -p 8000:8000 docker_pyas2
+    $ docker build -t docker_pyas2 . && docker run -p 8000:8000 docker_pyas2
 
 
 In case the files on the host file system should be used, connect the directory to the host by
@@ -57,6 +57,6 @@ running to docker run command with the -v option:
 
 .. code-block:: console
 
-    docker build -t docker_pyas2 . && docker run -p 8000:8000 -v $PWD/django_pyas2:/django_pyas2 docker_pyas2
+    $ docker build -t docker_pyas2 . && docker run -p 8000:8000 -v $PWD/django_pyas2:/django_pyas2 docker_pyas2
 
 
