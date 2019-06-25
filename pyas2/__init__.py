@@ -1,5 +1,5 @@
 # Set the version
-__version__ = '1.1.0'
+__version__ = '1.1.1'
 
 default_app_config = 'pyas2.apps.Pyas2Config'
 

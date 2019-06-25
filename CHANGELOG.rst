@@ -1,6 +1,14 @@
 Release History
 ===============
 
+1.1.1 - 2019-06-25
+------------------
+
+* Bump version of pyas2lib to 1.2.2
+* Add more logging for better debugging
+* Removing X-Frame-Options header from AS2 response object
+
+
 1.1.0 - 2019-06-13
 ------------------
 
