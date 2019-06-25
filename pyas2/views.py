@@ -10,6 +10,7 @@ from django.utils.translation import ugettext as _
 from django.urls import reverse_lazy
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.generic import FormView
 from pyas2lib import Message as As2Message
 from pyas2lib import Mdn as As2Mdn
@@ -64,6 +65,7 @@ class ReceiveAs2Message(View):
         if partner:
             return partner.as2partner
 
+    @xframe_options_exempt
     @csrf_exempt
     def post(self, request, *args, **kwargs):
 

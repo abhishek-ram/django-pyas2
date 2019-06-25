@@ -15,7 +15,7 @@ In the django_pyas2 project directory invoke the script as follows:
 
 .. code-block:: console
 
-    python manage.py startapp extend_pyas2
+    $ python manage.py startapp extend_pyas2
 
 
 This has now created a new directory containing files that may be used for apps:
@@ -70,7 +70,7 @@ command:
 
 .. code-block:: console
 
-    python manage.py filewatcher
+    $ python manage.py filewatcher
 
 
 .. code-block:: python
