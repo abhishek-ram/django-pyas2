@@ -4,6 +4,8 @@ import os
 import time
 from string import Template
 
+from pyas2.signals import post_send, post_receive
+
 logger = logging.getLogger('pyas2')
 
 
@@ -34,6 +36,10 @@ def run_post_send(message):
     """ Execute command after successful send, can be used to notify
     successful sends """
 
+    # First we trigger the signal in case any app is listening
+    from pyas2.models import Message
+    post_send.send(sender=Message, message=message)
+
     command = message.partner.cmd_send
     if command:
         logger.debug('Execute post successful send command %s' % command)
@@ -54,6 +60,10 @@ def run_post_send(message):
 def run_post_receive(message, full_filename):
     """ Execute command after successful receive, can be used to call the
     edi program for further processing"""
+
+    # First we trigger the signal in case any app is listening
+    from pyas2.models import Message
+    post_receive.send(sender=Message, message=message, full_filename=full_filename)
 
     command = message.partner.cmd_receive
     if command:
