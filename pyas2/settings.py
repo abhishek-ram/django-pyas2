@@ -24,3 +24,5 @@ ASYNC_MDN_WAIT = APP_SETTINGS.get('ASYNC_MDN_WAIT', 30)
 # Max number of days worth of messages to be saved in archive
 MAX_ARCH_DAYS = APP_SETTINGS.get('MAX_ARCH_DAYS', 30)
 
+# Enable inbox storage for file-based integrations
+ENABLE_INBOX = APP_SETTINGS.get('ENABLE_INBOX', True)

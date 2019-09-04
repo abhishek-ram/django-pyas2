@@ -5,6 +5,7 @@ from django.test import Client
 from django.test import TestCase
 from pathlib import Path
 from pyas2lib import Message as As2Message
+import pytest
 
 from pyas2 import settings
 from pyas2.models import Message

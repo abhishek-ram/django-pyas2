@@ -280,7 +280,8 @@ class MessageManager(models.Manager):
 
         # Save the payload to the inbox folder
         full_filename = None
-        if direction == 'IN' and status == 'S':
+        print(settings.ENABLE_INBOX)
+        if settings.ENABLE_INBOX and direction == 'IN' and status == 'S':
             folder = os.path.join(settings.DATA_DIR, 'messages', organization, 'inbox', partner)
             if not message.partner.keep_filename or not filename:
                 filename = f'{message.message_id}.msg'
