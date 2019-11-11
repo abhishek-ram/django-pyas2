@@ -249,6 +249,7 @@ class DownloadFile(View):
             disposition_type = 'attachment'
             response['Content-Disposition'] = disposition_type + '; filename=' + filename
             response.write(file_content)
+            response.write(bytes(file_content))
             return response
         else:
             raise Http404()
