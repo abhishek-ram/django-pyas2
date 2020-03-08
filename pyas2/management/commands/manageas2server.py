@@ -1,6 +1,6 @@
 import os
 import requests
-from email.parser import HeaderParser
+from email.parser import BytesHeaderParser
 from datetime import timedelta
 from django.core.management.base import BaseCommand
 from django.utils import timezone
@@ -89,8 +89,8 @@ class Command(BaseCommand):
 
             for pending_mdn in in_pending_mdns:
                 # Parse the MDN headers from text
-                header_parser = HeaderParser()
-                mdn_headers = header_parser.parsestr(pending_mdn.headers.read())
+                header_parser = BytesHeaderParser()
+                mdn_headers = header_parser.parsebytes(pending_mdn.headers.read())
                 try:
                     # Set http basic auth if enabled in the partner profile
                     auth = None
