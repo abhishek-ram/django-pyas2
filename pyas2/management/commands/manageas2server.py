@@ -94,7 +94,7 @@ class Command(BaseCommand):
                 try:
                     # Set http basic auth if enabled in the partner profile
                     auth = None
-                    if pending_mdn.message.partner.http_auth:
+                    if pending_mdn.message.partner and pending_mdn.message.partner.http_auth:
                         auth = (pending_mdn.message.partner.http_auth_user,
                                 pending_mdn.message.partner.http_auth_pass)
 
