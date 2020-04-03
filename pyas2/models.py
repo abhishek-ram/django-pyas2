@@ -420,7 +420,10 @@ class Message(models.Model):
                 else:
                     self.status = 'E'
                     self.detailed_status = f'Partner failed to process message: {detailed_status}'
-                Mdn.objects.create_from_as2mdn(as2mdn=as2mdn, message=self, status='R')
+
+                # Create MDN object if received
+                if status != 'failed/Failure' and detailed_status != 'mdn-not-found':
+                    Mdn.objects.create_from_as2mdn(as2mdn=as2mdn, message=self, status='R')
         else:
             # No MDN requested mark message as success and run command
             self.status = 'S'
