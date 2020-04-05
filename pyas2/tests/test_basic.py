@@ -1,20 +1,16 @@
-from __future__ import unicode_literals
+import os
+from email.parser import HeaderParser
+from unittest import mock
+
 from django.test import TestCase, Client
+from requests import Response
+
 from pyas2.models import PrivateKey, PublicCertificate, Organization, Partner, \
     Message, Mdn
 from pyas2 import settings
 from pyas2lib.as2 import Message as As2Message
-from email.parser import HeaderParser
-from requests import Response
-try:
-    from itertools import izip as zip
-except ImportError: # will be 3.x series
-    pass
-import mock
-import os
 
-TEST_DIR = os.path.join((os.path.dirname(
-    os.path.abspath(__file__))),  'fixtures')
+TEST_DIR = os.path.join((os.path.dirname(os.path.abspath(__file__))),  'fixtures')
 
 
 class BasicServerClientTestCase(TestCase):

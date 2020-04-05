@@ -1,2 +1,3 @@
--r base.txt
+pyas2lib==1.3.0
+requests
 -r test.txt

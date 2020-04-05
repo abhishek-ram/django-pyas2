@@ -1,9 +1,10 @@
-import mock
 import os
+from pathlib import Path
+from unittest import mock
+
 from django.core import management
 from django.test import Client
 from django.test import TestCase
-from pathlib import Path
 from pyas2lib import Message as As2Message
 
 from pyas2 import settings
