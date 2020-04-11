@@ -1,4 +1,7 @@
-pytest
-pytest-cov
-pytest-django
-pytest-mock
+pytest==5.4.1
+pytest-cov==2.8.1
+pytest-django==3.9.0
+pytest-mock==3.0.0
+pylama==7.7.1
+pytest-black==0.3.8
+django-environ==0.4.5
