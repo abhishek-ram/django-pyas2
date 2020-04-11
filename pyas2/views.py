@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
 import logging
 import os
+
 from django.contrib import messages
 from django.shortcuts import Http404
 from django.shortcuts import HttpResponse

@@ -7,7 +7,6 @@ from requests import Response
 
 from pyas2.models import PrivateKey, PublicCertificate, Organization, Partner, \
     Message, Mdn
-from pyas2 import settings
 from pyas2lib.as2 import Message as As2Message
 
 TEST_DIR = os.path.join((os.path.dirname(os.path.abspath(__file__))),  'fixtures')
@@ -73,7 +72,7 @@ class BasicServerClientTestCase(TestCase):
     def tearDown(self):
         # remove all files in the inbox folders
         inbox = os.path.join(
-            settings.DATA_DIR, 'messages', 'as2server', 'inbox', 'as2client')
+            'messages', 'as2server', 'inbox', 'as2client')
         for the_file in os.listdir(inbox):
             file_path = os.path.join(inbox, the_file)
             if os.path.isfile(file_path):

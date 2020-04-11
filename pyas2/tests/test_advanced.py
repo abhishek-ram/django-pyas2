@@ -79,8 +79,7 @@ class AdvancedTestCases(TestCase):
     @classmethod
     def tearDownClass(cls):
         # remove all files in the inbox folders
-        inbox = os.path.join(
-            settings.DATA_DIR, 'messages', 'as2server', 'inbox', 'as2client')
+        inbox = os.path.join('messages', 'as2server', 'inbox', 'as2client')
         try:
             files = os.listdir(inbox)
         except OSError:
@@ -177,7 +176,7 @@ class AdvancedTestCases(TestCase):
 
         # Check that the command got executed
         touch_file = os.path.join(
-            TEST_DIR, '%s.msg.received' % in_message.message_id)
+            TEST_DIR, '%s.msg.received' % in_message.message_id.replace("@", ""))
         self.assertTrue(os.path.exists(touch_file))
         os.remove(touch_file)
 
@@ -426,8 +425,7 @@ class AdvancedTestCases(TestCase):
     def test_sendbulk_command(self):
         """ Test the command for sending all files in the outbox folder """
         # Create a file for testing
-        outbox_dir = os.path.join(
-            settings.DATA_DIR, 'messages', 'as2client', 'outbox', 'as2server')
+        outbox_dir = os.path.join('messages', 'as2client', 'outbox', 'as2server')
         try:
             os.makedirs(outbox_dir)
         except FileExistsError:

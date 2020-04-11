@@ -3,6 +3,7 @@ import os
 
 from django.core.management.base import BaseCommand
 from django.core.management.base import CommandError
+from django.core.files.storage import default_storage
 from pyas2lib import Message as AS2Message
 
 from pyas2.models import Message
@@ -44,18 +45,14 @@ class Command(BaseCommand):
             raise CommandError(
                 f'Partner "{options["partner_as2name"]}" does not exist')
 
-        # Check if file exists and we have the right permissions
-        if not os.path.isfile(options['path_to_payload']):
+        # Check if file exists
+        if not default_storage.exists(options['path_to_payload']):
             raise CommandError(
                 f'Payload at location "{options["path_to_payload"]}" does not exist.')
 
-        if options['delete'] and not os.access(options['path_to_payload'], os.W_OK):
-            raise CommandError(
-                f'Insufficient file permission for payload {options["path_to_payload"]}.')
-
         # Build and send the AS2 message
         original_filename = os.path.basename(options['path_to_payload'])
-        with open(options['path_to_payload'], 'rb') as in_file:
+        with default_storage.open(options['path_to_payload'], 'rb') as in_file:
             payload = in_file.read()
             as2message = AS2Message(sender=org.as2org, receiver=partner.as2partner)
             as2message.build(
@@ -75,4 +72,4 @@ class Command(BaseCommand):
 
         # Delete original file if option is set
         if options['delete']:
-            os.remove(options['path_to_payload'])
+            default_storage.delete(options['path_to_payload'])
