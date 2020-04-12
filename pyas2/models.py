@@ -491,20 +491,23 @@ class Message(models.Model):
                     f"with content: {mdn_content}"
                 )
                 as2mdn = As2Mdn()
-                status, detailed_status = as2mdn.parse(
+                mdn_status, mdn_detailed_status = as2mdn.parse(
                     mdn_content, lambda x, y: self.as2message
                 )
 
                 # Update the message status and return the response
-                if status == "processed":
+                if mdn_status == "processed":
                     self.status = "S"
                     run_post_send(self)
                 else:
                     self.status = "E"
                     self.detailed_status = (
-                        f"Partner failed to process message: {detailed_status}"
+                        f"Partner failed to process message: {mdn_detailed_status}"
                     )
-                Mdn.objects.create_from_as2mdn(as2mdn=as2mdn, message=self, status="R")
+                if mdn_detailed_status != "mdn-not-found":
+                    Mdn.objects.create_from_as2mdn(
+                        as2mdn=as2mdn, message=self, status="R"
+                    )
         else:
             # No MDN requested mark message as success and run command
             self.status = "S"
