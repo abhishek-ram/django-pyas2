@@ -455,7 +455,7 @@ class Message(models.Model):
                 verify=self.partner.https_verify_ssl,
             )
             response.raise_for_status()
-        except requests.exceptions.RequestException as e:
+        except requests.exceptions.RequestException:
             self.status = "R"
             self.detailed_status = (
                 f"Failed to send message, error:\n{traceback.format_exc()}"

@@ -182,7 +182,8 @@ class Migration(migrations.Migration):
                     "confirmation_message",
                     models.TextField(
                         blank=True,
-                        help_text="Use this field to send a customized message in the MDN Confirmations for this Partner",
+                        help_text="Use this field to send a customized message in the MDN "
+                        "Confirmations for this Partner",
                         null=True,
                         verbose_name="Confirmation Message",
                     ),
@@ -191,7 +192,8 @@ class Migration(migrations.Migration):
                     "keep_filename",
                     models.BooleanField(
                         default=False,
-                        help_text="Use Original Filename to to store file on receipt, use this option only if you are sure partner sends unique names",
+                        help_text="Use Original Filename to to store file on receipt, use this "
+                        "option only if you are sure partner sends unique names",
                         verbose_name="Keep Original Filename",
                     ),
                 ),
@@ -199,7 +201,9 @@ class Migration(migrations.Migration):
                     "cmd_send",
                     models.TextField(
                         blank=True,
-                        help_text="Command executed after successful message send, replacements are $filename, $sender, $recevier, $messageid and any message header such as $Subject",
+                        help_text="Command executed after successful message send, replacements "
+                        "are $filename, $sender, $recevier, $messageid and any message "
+                        "header such as $Subject",
                         null=True,
                         verbose_name="Command on Message Send",
                     ),
@@ -208,7 +212,9 @@ class Migration(migrations.Migration):
                     "cmd_receive",
                     models.TextField(
                         blank=True,
-                        help_text="Command executed after successful message receipt, replacements are $filename, $fullfilename, $sender, $recevier, $messageid and any message header such as $Subject",
+                        help_text="Command executed after successful message receipt, replacements"
+                        " are $filename, $fullfilename, $sender, $recevier, $messageid "
+                        "and any message header such as $Subject",
                         null=True,
                         verbose_name="Command on Message Receipt",
                     ),
@@ -258,7 +264,8 @@ class Migration(migrations.Migration):
                     "confirmation_message",
                     models.TextField(
                         blank=True,
-                        help_text="Use this field to send a customized message in the MDN Confirmations for this Organization",
+                        help_text="Use this field to send a customized message in the MDN "
+                        "Confirmations for this Organization",
                         null=True,
                         verbose_name="Confirmation Message",
                     ),

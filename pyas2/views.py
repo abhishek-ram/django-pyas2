@@ -14,7 +14,7 @@ from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.generic import FormView
 from pyas2lib import Message as As2Message
 from pyas2lib import Mdn as As2Mdn
-from pyas2lib.exceptions import *
+from pyas2lib.exceptions import DuplicateDocument
 
 from pyas2.models import Mdn
 from pyas2.models import Message
