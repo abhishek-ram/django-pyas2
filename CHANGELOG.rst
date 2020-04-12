@@ -1,6 +1,15 @@
 Release History
 ===============
 
+1.2.0 - 2020-04-12
+------------------
+
+* Bump version of pyas2lib to 1.3.1
+* Improve the test coverage for the repo
+* Use django storage framework when dealing with the file system
+* Handle cases where we get a 200 response without an MDN when sending messages
+* Set login required for the download and send message endpoints
+
 1.1.1 - 2019-06-25
 ------------------
 
