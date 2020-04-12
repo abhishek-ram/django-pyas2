@@ -9,3 +9,6 @@ omit =
 
     # Omit the template tags
     pyas2/templatetags/pyas2.py
+
+    # Omit tests
+    pyas2/tests/*

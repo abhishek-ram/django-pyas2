@@ -6,46 +6,48 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('pyas2', '0001_initial'),
+        ("pyas2", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='partner',
-            name='https_verify_ssl',
-            field=models.BooleanField(default=True,
-                                      help_text='Uncheck this option to disable SSL '
-                                                'certificate verification to HTTPS.',
-                                      verbose_name='Verify SSL Certificate'),
+            model_name="partner",
+            name="https_verify_ssl",
+            field=models.BooleanField(
+                default=True,
+                help_text="Uncheck this option to disable SSL "
+                "certificate verification to HTTPS.",
+                verbose_name="Verify SSL Certificate",
+            ),
         ),
         migrations.AddField(
-            model_name='publiccertificate',
-            name='valid_from',
+            model_name="publiccertificate",
+            name="valid_from",
             field=models.DateTimeField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='publiccertificate',
-            name='valid_to',
+            model_name="publiccertificate",
+            name="valid_to",
             field=models.DateTimeField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='privatekey',
-            name='valid_from',
+            model_name="privatekey",
+            name="valid_from",
             field=models.DateTimeField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='privatekey',
-            name='valid_to',
+            model_name="privatekey",
+            name="valid_to",
             field=models.DateTimeField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='privatekey',
-            name='serial_number',
+            model_name="privatekey",
+            name="serial_number",
             field=models.CharField(blank=True, max_length=64, null=True),
         ),
         migrations.AddField(
-            model_name='publiccertificate',
-            name='serial_number',
+            model_name="publiccertificate",
+            name="serial_number",
             field=models.CharField(blank=True, max_length=64, null=True),
         ),
     ]

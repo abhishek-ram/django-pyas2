@@ -9,102 +9,407 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='PrivateKey',
+            name="PrivateKey",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=255)),
-                ('key', models.BinaryField()),
-                ('key_pass', models.CharField(max_length=100, verbose_name='Private Key Password')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=255)),
+                ("key", models.BinaryField()),
+                (
+                    "key_pass",
+                    models.CharField(
+                        max_length=100, verbose_name="Private Key Password"
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='PublicCertificate',
+            name="PublicCertificate",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=255)),
-                ('certificate', models.BinaryField()),
-                ('certificate_ca', models.BinaryField(blank=True, null=True, verbose_name='Local CA Store')),
-                ('verify_cert', models.BooleanField(default=True, help_text='Uncheck this option to disable certificate verification.', verbose_name='Verify Certificate')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=255)),
+                ("certificate", models.BinaryField()),
+                (
+                    "certificate_ca",
+                    models.BinaryField(
+                        blank=True, null=True, verbose_name="Local CA Store"
+                    ),
+                ),
+                (
+                    "verify_cert",
+                    models.BooleanField(
+                        default=True,
+                        help_text="Uncheck this option to disable certificate verification.",
+                        verbose_name="Verify Certificate",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Partner',
+            name="Partner",
             fields=[
-                ('name', models.CharField(max_length=100, verbose_name='Partner Name')),
-                ('as2_name', models.CharField(max_length=100, primary_key=True, serialize=False, verbose_name='AS2 Identifier')),
-                ('email_address', models.EmailField(blank=True, max_length=254, null=True)),
-                ('http_auth', models.BooleanField(default=False, verbose_name='Enable Authentication')),
-                ('http_auth_user', models.CharField(blank=True, max_length=100, null=True)),
-                ('http_auth_pass', models.CharField(blank=True, max_length=100, null=True)),
-                ('target_url', models.URLField()),
-                ('subject', models.CharField(default='EDI Message sent using pyas2', max_length=255)),
-                ('content_type', models.CharField(choices=[('application/EDI-X12', 'application/EDI-X12'), ('application/EDIFACT', 'application/EDIFACT'), ('application/edi-consent', 'application/edi-consent'), ('application/XML', 'application/XML')], default='application/edi-consent', max_length=100)),
-                ('compress', models.BooleanField(default=False, verbose_name='Compress Message')),
-                ('encryption', models.CharField(blank=True, choices=[('tripledes_192_cbc', '3DES'), ('rc2_128_cbc', 'RC2-128'), ('rc4_128_cbc', 'RC4-128'), ('aes_128_cbc', 'AES-128'), ('aes_192_cbc', 'AES-192'), ('aes_256_cbc', 'AES-256')], max_length=20, null=True, verbose_name='Encrypt Message')),
-                ('signature', models.CharField(blank=True, choices=[('sha1', 'SHA-1'), ('sha224', 'SHA-224'), ('sha256', 'SHA-256'), ('sha384', 'SHA-384'), ('sha512', 'SHA-512')], max_length=20, null=True, verbose_name='Sign Message')),
-                ('mdn', models.BooleanField(default=False, verbose_name='Request MDN')),
-                ('mdn_mode', models.CharField(blank=True, choices=[('SYNC', 'Synchronous'), ('ASYNC', 'Asynchronous')], max_length=20, null=True)),
-                ('mdn_sign', models.CharField(blank=True, choices=[('sha1', 'SHA-1'), ('sha224', 'SHA-224'), ('sha256', 'SHA-256'), ('sha384', 'SHA-384'), ('sha512', 'SHA-512')], max_length=20, null=True, verbose_name='Request Signed MDN')),
-                ('confirmation_message', models.TextField(blank=True, help_text='Use this field to send a customized message in the MDN Confirmations for this Partner', null=True, verbose_name='Confirmation Message')),
-                ('keep_filename', models.BooleanField(default=False, help_text='Use Original Filename to to store file on receipt, use this option only if you are sure partner sends unique names', verbose_name='Keep Original Filename')),
-                ('cmd_send', models.TextField(blank=True, help_text='Command executed after successful message send, replacements are $filename, $sender, $recevier, $messageid and any message header such as $Subject', null=True, verbose_name='Command on Message Send')),
-                ('cmd_receive', models.TextField(blank=True, help_text='Command executed after successful message receipt, replacements are $filename, $fullfilename, $sender, $recevier, $messageid and any message header such as $Subject', null=True, verbose_name='Command on Message Receipt')),
-                ('encryption_cert', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='pyas2.PublicCertificate')),
-                ('signature_cert', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='partner_s', to='pyas2.PublicCertificate')),
+                ("name", models.CharField(max_length=100, verbose_name="Partner Name")),
+                (
+                    "as2_name",
+                    models.CharField(
+                        max_length=100,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="AS2 Identifier",
+                    ),
+                ),
+                (
+                    "email_address",
+                    models.EmailField(blank=True, max_length=254, null=True),
+                ),
+                (
+                    "http_auth",
+                    models.BooleanField(
+                        default=False, verbose_name="Enable Authentication"
+                    ),
+                ),
+                (
+                    "http_auth_user",
+                    models.CharField(blank=True, max_length=100, null=True),
+                ),
+                (
+                    "http_auth_pass",
+                    models.CharField(blank=True, max_length=100, null=True),
+                ),
+                ("target_url", models.URLField()),
+                (
+                    "subject",
+                    models.CharField(
+                        default="EDI Message sent using pyas2", max_length=255
+                    ),
+                ),
+                (
+                    "content_type",
+                    models.CharField(
+                        choices=[
+                            ("application/EDI-X12", "application/EDI-X12"),
+                            ("application/EDIFACT", "application/EDIFACT"),
+                            ("application/edi-consent", "application/edi-consent"),
+                            ("application/XML", "application/XML"),
+                        ],
+                        default="application/edi-consent",
+                        max_length=100,
+                    ),
+                ),
+                (
+                    "compress",
+                    models.BooleanField(default=False, verbose_name="Compress Message"),
+                ),
+                (
+                    "encryption",
+                    models.CharField(
+                        blank=True,
+                        choices=[
+                            ("tripledes_192_cbc", "3DES"),
+                            ("rc2_128_cbc", "RC2-128"),
+                            ("rc4_128_cbc", "RC4-128"),
+                            ("aes_128_cbc", "AES-128"),
+                            ("aes_192_cbc", "AES-192"),
+                            ("aes_256_cbc", "AES-256"),
+                        ],
+                        max_length=20,
+                        null=True,
+                        verbose_name="Encrypt Message",
+                    ),
+                ),
+                (
+                    "signature",
+                    models.CharField(
+                        blank=True,
+                        choices=[
+                            ("sha1", "SHA-1"),
+                            ("sha224", "SHA-224"),
+                            ("sha256", "SHA-256"),
+                            ("sha384", "SHA-384"),
+                            ("sha512", "SHA-512"),
+                        ],
+                        max_length=20,
+                        null=True,
+                        verbose_name="Sign Message",
+                    ),
+                ),
+                ("mdn", models.BooleanField(default=False, verbose_name="Request MDN")),
+                (
+                    "mdn_mode",
+                    models.CharField(
+                        blank=True,
+                        choices=[("SYNC", "Synchronous"), ("ASYNC", "Asynchronous")],
+                        max_length=20,
+                        null=True,
+                    ),
+                ),
+                (
+                    "mdn_sign",
+                    models.CharField(
+                        blank=True,
+                        choices=[
+                            ("sha1", "SHA-1"),
+                            ("sha224", "SHA-224"),
+                            ("sha256", "SHA-256"),
+                            ("sha384", "SHA-384"),
+                            ("sha512", "SHA-512"),
+                        ],
+                        max_length=20,
+                        null=True,
+                        verbose_name="Request Signed MDN",
+                    ),
+                ),
+                (
+                    "confirmation_message",
+                    models.TextField(
+                        blank=True,
+                        help_text="Use this field to send a customized message in the MDN "
+                        "Confirmations for this Partner",
+                        null=True,
+                        verbose_name="Confirmation Message",
+                    ),
+                ),
+                (
+                    "keep_filename",
+                    models.BooleanField(
+                        default=False,
+                        help_text="Use Original Filename to to store file on receipt, use this "
+                        "option only if you are sure partner sends unique names",
+                        verbose_name="Keep Original Filename",
+                    ),
+                ),
+                (
+                    "cmd_send",
+                    models.TextField(
+                        blank=True,
+                        help_text="Command executed after successful message send, replacements "
+                        "are $filename, $sender, $recevier, $messageid and any message "
+                        "header such as $Subject",
+                        null=True,
+                        verbose_name="Command on Message Send",
+                    ),
+                ),
+                (
+                    "cmd_receive",
+                    models.TextField(
+                        blank=True,
+                        help_text="Command executed after successful message receipt, replacements"
+                        " are $filename, $fullfilename, $sender, $recevier, $messageid "
+                        "and any message header such as $Subject",
+                        null=True,
+                        verbose_name="Command on Message Receipt",
+                    ),
+                ),
+                (
+                    "encryption_cert",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to="pyas2.PublicCertificate",
+                    ),
+                ),
+                (
+                    "signature_cert",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="partner_s",
+                        to="pyas2.PublicCertificate",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Organization',
+            name="Organization",
             fields=[
-                ('name', models.CharField(max_length=100, verbose_name='Organization Name')),
-                ('as2_name', models.CharField(max_length=100, primary_key=True, serialize=False, verbose_name='AS2 Identifier')),
-                ('email_address', models.EmailField(blank=True, max_length=254, null=True)),
-                ('confirmation_message', models.TextField(blank=True, help_text='Use this field to send a customized message in the MDN Confirmations for this Organization', null=True, verbose_name='Confirmation Message')),
-                ('encryption_key', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='pyas2.PrivateKey')),
-                ('signature_key', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='org_s', to='pyas2.PrivateKey')),
+                (
+                    "name",
+                    models.CharField(max_length=100, verbose_name="Organization Name"),
+                ),
+                (
+                    "as2_name",
+                    models.CharField(
+                        max_length=100,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="AS2 Identifier",
+                    ),
+                ),
+                (
+                    "email_address",
+                    models.EmailField(blank=True, max_length=254, null=True),
+                ),
+                (
+                    "confirmation_message",
+                    models.TextField(
+                        blank=True,
+                        help_text="Use this field to send a customized message in the MDN "
+                        "Confirmations for this Organization",
+                        null=True,
+                        verbose_name="Confirmation Message",
+                    ),
+                ),
+                (
+                    "encryption_key",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to="pyas2.PrivateKey",
+                    ),
+                ),
+                (
+                    "signature_key",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="org_s",
+                        to="pyas2.PrivateKey",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Message',
+            name="Message",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('message_id', models.CharField(max_length=255)),
-                ('direction', models.CharField(choices=[('IN', 'Inbound'), ('OUT', 'Outbound')], max_length=5)),
-                ('timestamp', models.DateTimeField(auto_now_add=True)),
-                ('status', models.CharField(choices=[('S', 'Success'), ('E', 'Error'), ('W', 'Warning'), ('P', 'Pending'), ('R', 'Retry')], max_length=2)),
-                ('detailed_status', models.TextField(null=True)),
-                ('headers', models.FileField(blank=True, null=True, upload_to=pyas2.models.get_message_store)),
-                ('payload', models.FileField(blank=True, null=True, upload_to=pyas2.models.get_message_store)),
-                ('compressed', models.BooleanField(default=False)),
-                ('encrypted', models.BooleanField(default=False)),
-                ('signed', models.BooleanField(default=False)),
-                ('mdn_mode', models.CharField(choices=[('SYNC', 'Synchronous'), ('ASYNC', 'Asynchronous')], max_length=5, null=True)),
-                ('mic', models.CharField(max_length=100, null=True)),
-                ('retries', models.IntegerField(null=True)),
-                ('organization', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='pyas2.Organization')),
-                ('partner', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='pyas2.Partner')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("message_id", models.CharField(max_length=255)),
+                (
+                    "direction",
+                    models.CharField(
+                        choices=[("IN", "Inbound"), ("OUT", "Outbound")], max_length=5
+                    ),
+                ),
+                ("timestamp", models.DateTimeField(auto_now_add=True)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("S", "Success"),
+                            ("E", "Error"),
+                            ("W", "Warning"),
+                            ("P", "Pending"),
+                            ("R", "Retry"),
+                        ],
+                        max_length=2,
+                    ),
+                ),
+                ("detailed_status", models.TextField(null=True)),
+                (
+                    "headers",
+                    models.FileField(
+                        blank=True, null=True, upload_to=pyas2.models.get_message_store
+                    ),
+                ),
+                (
+                    "payload",
+                    models.FileField(
+                        blank=True, null=True, upload_to=pyas2.models.get_message_store
+                    ),
+                ),
+                ("compressed", models.BooleanField(default=False)),
+                ("encrypted", models.BooleanField(default=False)),
+                ("signed", models.BooleanField(default=False)),
+                (
+                    "mdn_mode",
+                    models.CharField(
+                        choices=[("SYNC", "Synchronous"), ("ASYNC", "Asynchronous")],
+                        max_length=5,
+                        null=True,
+                    ),
+                ),
+                ("mic", models.CharField(max_length=100, null=True)),
+                ("retries", models.IntegerField(null=True)),
+                (
+                    "organization",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to="pyas2.Organization",
+                    ),
+                ),
+                (
+                    "partner",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to="pyas2.Partner",
+                    ),
+                ),
             ],
-            options={
-                'unique_together': {('message_id', 'partner')},
-            },
+            options={"unique_together": {("message_id", "partner")},},
         ),
         migrations.CreateModel(
-            name='Mdn',
+            name="Mdn",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('mdn_id', models.CharField(max_length=255)),
-                ('timestamp', models.DateTimeField(auto_now_add=True)),
-                ('status', models.CharField(choices=[('S', 'Sent'), ('R', 'Received'), ('P', 'Pending')], max_length=2)),
-                ('signed', models.BooleanField(default=False)),
-                ('return_url', models.URLField(null=True)),
-                ('headers', models.FileField(blank=True, null=True, upload_to=pyas2.models.get_mdn_store)),
-                ('payload', models.FileField(blank=True, null=True, upload_to=pyas2.models.get_mdn_store)),
-                ('message', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to='pyas2.Message')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("mdn_id", models.CharField(max_length=255)),
+                ("timestamp", models.DateTimeField(auto_now_add=True)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[("S", "Sent"), ("R", "Received"), ("P", "Pending")],
+                        max_length=2,
+                    ),
+                ),
+                ("signed", models.BooleanField(default=False)),
+                ("return_url", models.URLField(null=True)),
+                (
+                    "headers",
+                    models.FileField(
+                        blank=True, null=True, upload_to=pyas2.models.get_mdn_store
+                    ),
+                ),
+                (
+                    "payload",
+                    models.FileField(
+                        blank=True, null=True, upload_to=pyas2.models.get_mdn_store
+                    ),
+                ),
+                (
+                    "message",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE, to="pyas2.Message"
+                    ),
+                ),
             ],
         ),
     ]
