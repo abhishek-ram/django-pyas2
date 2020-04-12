@@ -4,6 +4,7 @@ from unittest import mock
 
 from django.test import TestCase, Client
 from requests import Response
+from requests.exceptions import RequestException
 
 from pyas2.models import (
     PrivateKey,
@@ -13,9 +14,9 @@ from pyas2.models import (
     Message,
     Mdn,
 )
-from pyas2lib.as2 import Message as As2Message
+from pyas2.tests import TEST_DIR
 
-TEST_DIR = os.path.join((os.path.dirname(os.path.abspath(__file__))), "fixtures")
+from pyas2lib.as2 import Message as As2Message
 
 
 class BasicServerClientTestCase(TestCase):
@@ -528,6 +529,10 @@ class BasicServerClientTestCase(TestCase):
         self.assertTrue(
             self.compareFiles(in_message.payload.name, out_message.payload.name)
         )
+
+        # Check async mdn failure
+        mock_request.side_effect = RequestException()
+        out_message.mdn.send_async_mdn()
 
     @mock.patch("requests.post")
     def build_and_send(self, partner, mock_request):

@@ -1,9 +1,8 @@
+import importlib
 import os
-from pathlib import Path
 from unittest import mock
 
-from django.core import management
-from django.test import Client
+from django.test import Client, override_settings
 from django.test import TestCase
 from pyas2lib import Message as As2Message
 
@@ -15,8 +14,7 @@ from pyas2.models import Partner
 from pyas2.models import PrivateKey
 from pyas2.models import PublicCertificate
 from pyas2.tests.test_basic import SendMessageMock
-
-TEST_DIR = os.path.join((os.path.dirname(os.path.abspath(__file__))), "fixtures")
+from pyas2.tests import TEST_DIR
 
 
 class AdvancedTestCases(TestCase):
@@ -98,6 +96,9 @@ class AdvancedTestCases(TestCase):
             as2_name="as2server",
             target_url="http://localhost:8080/pyas2/as2receive",
             signature="sha1",
+            http_auth=True,
+            http_auth_user="admin",
+            http_auth_pass="password",
             signature_cert=self.server_crt,
             encryption="tripledes_192_cbc",
             encryption_cert=self.server_crt,
@@ -152,7 +153,7 @@ class AdvancedTestCases(TestCase):
 
     def test_post_receive_command(self):
         """ Test that the command after successful receive gets executed."""
-
+        # settings.DATA_DIR = TEST_DIR
         # add the post receive command and save it
         self.partner.cmd_receive = "touch %s/$filename.received" % TEST_DIR
         self.partner.save()
@@ -179,10 +180,11 @@ class AdvancedTestCases(TestCase):
         )
         self.assertTrue(os.path.exists(touch_file))
         os.remove(touch_file)
+        # shutil.rmtree(os.path.join(TEST_DIR, "messages"))
+        # settings.DATA_DIR = None
 
     def test_use_received_filename(self):
-        """ Test using the filename of the payload received while saving
-        the file."""
+        """ Test using the filename of the payload received while saving the file."""
 
         # add the post receive command and save it
         self.partner.cmd_receive = "touch %s/$filename.received" % TEST_DIR
@@ -420,79 +422,6 @@ class AdvancedTestCases(TestCase):
             "Failed to verify message signature" in out_message.detailed_status
         )
 
-    def test_sendmessage_command(self):
-        """ Test the command for an sending as2 message """
-        test_message = os.path.join(TEST_DIR, "testmessage.edi")
-
-        # Try to run with invalid org and client
-        with self.assertRaises(management.CommandError):
-            management.call_command(
-                "sendas2message", "AS2 Server", "AS2 Client", test_message
-            )
-        management.call_command(
-            "sendas2message", "as2server", "as2client", test_message
-        )
-
-    def test_sendbulk_command(self):
-        """ Test the command for sending all files in the outbox folder """
-        # Create a file for testing
-        outbox_dir = os.path.join("messages", "as2client", "outbox", "as2server")
-        try:
-            os.makedirs(outbox_dir)
-        except FileExistsError:
-            pass
-        test_file = Path(os.path.join(outbox_dir, "testmessage.edi"))
-        test_file.touch()
-
-        management.call_command("sendas2bulk")
-        self.assertFalse(test_file.exists())
-
-    def test_manageserver_command(self):
-        """ Test the command for managing the as2 server """
-        settings.MAX_ARCH_DAYS = -1
-        # Create a message
-        as2message = As2Message(
-            sender=self.organization.as2org, receiver=self.partner.as2partner
-        )
-        as2message.build(
-            self.payload,
-            filename="testmessage.edi",
-            subject=self.partner.subject,
-            content_type=self.partner.content_type,
-        )
-        out_message, _ = Message.objects.create_from_as2message(
-            as2message=as2message, payload=self.payload, direction="OUT", status="P"
-        )
-        out_message.send_message(as2message.headers, as2message.content)
-
-        # Test the retry command
-        out_message.refresh_from_db()
-        self.assertEqual(out_message.status, "R")
-        management.call_command("manageas2server", retry=True)
-        out_message.refresh_from_db()
-        self.assertEqual(out_message.retries, 1)
-
-        # Test max retry setting
-        settings.MAX_RETRIES = 1
-        management.call_command("manageas2server", retry=True)
-        out_message.refresh_from_db()
-        self.assertEqual(out_message.retries, 2)
-        self.assertEqual(out_message.status, "E")
-
-        # Test the async mdn command for outbound messages
-        out_message.status = "P"
-        out_message.save()
-        settings.ASYNC_MDN_WAIT = 0
-        management.call_command("manageas2server", async_mdns=True)
-        out_message.refresh_from_db()
-        self.assertEqual(out_message.status, "E")
-
-        # Test the clean command
-        management.call_command("manageas2server", clean=True)
-        self.assertEqual(
-            Message.objects.filter(message_id=out_message.message_id).count(), 0
-        )
-
     @mock.patch("requests.post")
     def build_and_send(self, partner, mock_request, smudge=False):
         # Build and send the message to server
@@ -515,3 +444,11 @@ class AdvancedTestCases(TestCase):
         )
 
         return out_message
+
+
+@override_settings(PYAS2={"DATA_DIR": TEST_DIR})
+def test_setting_data_directory():
+    """Test that the data directory gets set correctly."""
+    assert settings.DATA_DIR is None
+    importlib.reload(settings)
+    assert settings.DATA_DIR is TEST_DIR
