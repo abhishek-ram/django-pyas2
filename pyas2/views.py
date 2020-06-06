@@ -52,7 +52,9 @@ class ReceiveAs2Message(View):
         """ Check if the message already exists in the system """
         if settings.ERROR_ON_DUPLICATE:
             return Message.objects.filter(
-                message_id=message_id, partner_id=partner_id.strip(), status__in=("S", "P")
+                message_id=message_id,
+                partner_id=partner_id.strip(),
+                status__in=("S", "P"),
             ).exists()
         else:
             return False
@@ -146,9 +148,13 @@ class ReceiveAs2Message(View):
             )
 
             # In case of duplicates update message id
-            if isinstance(exception[0], DuplicateDocument) or (not settings.ERROR_ON_DUPLICATE and
-                            self.check_same_message_exists(message_id=as2message.message_id,
-                                                           partner_id=as2message.sender.as2_name)):
+            if isinstance(exception[0], DuplicateDocument) or (
+                not settings.ERROR_ON_DUPLICATE
+                and self.check_same_message_exists(
+                    message_id=as2message.message_id,
+                    partner_id=as2message.sender.as2_name,
+                )
+            ):
                 as2message.message_id += "_duplicate"
 
             # Create the Message and MDN objects
