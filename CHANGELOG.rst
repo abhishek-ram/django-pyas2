@@ -1,6 +1,14 @@
 Release History
 ===============
 
+dev -
+------------------
+
+* Updated requirements files to have current dependencies
+* Added global option to switch off error on duplicate
+* Limited duplicate detection to successful previous transmissions only
+
+
 1.2.0 - 2020-04-12
 ------------------
 

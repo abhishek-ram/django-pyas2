@@ -34,6 +34,11 @@ The available settings along with their usage is described below:
 | MAX_ARCH_DAYS          | 30                         | Number of days files and messages are kept in  |
 |                        |                            | storage.                                       |
 +------------------------+----------------------------+------------------------------------------------+
+| ERROR_ON_DUPLICATE     | True                       | When set to true, duplicate messages are       |
+|                        |                            | handled as error with negative MDN.            |
+|                        |                            | When set to false, duplicates are handled as   |
+|                        |                            | successful transmissions.                      |
++------------------------+----------------------------+------------------------------------------------+
 
 
 The Data Directory
