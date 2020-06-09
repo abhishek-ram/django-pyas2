@@ -7,6 +7,7 @@ dev -
 * Updated requirements files to have current dependencies
 * Added global option to switch off error on duplicate
 * Limited duplicate detection to successful previous transmissions only
+* Giving random name to duplicate messages
 
 
 1.2.0 - 2020-04-12

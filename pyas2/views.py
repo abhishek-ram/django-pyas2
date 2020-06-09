@@ -12,6 +12,7 @@ from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.generic import FormView
+from django.utils.crypto import get_random_string
 from pyas2lib import Message as As2Message
 from pyas2lib import Mdn as As2Mdn
 from pyas2lib.exceptions import DuplicateDocument
@@ -155,7 +156,7 @@ class ReceiveAs2Message(View):
                     partner_id=as2message.sender.as2_name,
                 )
             ):
-                as2message.message_id += "_duplicate"
+                as2message.message_id += "_duplicate_" + get_random_string(5)
 
             # Create the Message and MDN objects
             message, full_fn = Message.objects.create_from_as2message(

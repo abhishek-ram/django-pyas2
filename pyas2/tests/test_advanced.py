@@ -257,9 +257,20 @@ class AdvancedTestCases(TestCase):
         # Make sure out message was created
         self.assertEqual(in_message.status, "E")
         out_message = Message.objects.get(
-            message_id=in_message.message_id + "_duplicate", direction="IN"
+            message_id__startswith=in_message.message_id + "_duplicate_", direction="IN"
         )
         self.assertEqual(out_message.status, "E")
+
+        # send it a third time to cause another duplicate error
+        in_message.send_message(as2message.headers, as2message.content)
+
+        # Make sure out message was created
+        self.assertEqual(in_message.status, "E")
+        out_messages = Message.objects.filter(
+            message_id__startswith=in_message.message_id + "_duplicate_", direction="IN"
+        )
+        for out_message in out_messages:
+            self.assertEqual(out_message.status, "E")
 
     @mock.patch("requests.post")
     def test_duplicate_success(self, mock_request):
@@ -308,9 +319,22 @@ class AdvancedTestCases(TestCase):
             # Make sure out message was created
             self.assertEqual(in_message.status, "S")
             out_message = Message.objects.get(
-                message_id=in_message.message_id + "_duplicate", direction="IN"
+                message_id__startswith=in_message.message_id + "_duplicate_",
+                direction="IN",
             )
             self.assertEqual(out_message.status, "S")
+
+            # send it again to, should not cause duplicate error, and no create error
+            in_message.send_message(as2message.headers, as2message.content)
+
+            # Make sure out message was created
+            self.assertEqual(in_message.status, "S")
+            out_messages = Message.objects.filter(
+                message_id__startswith=in_message.message_id + "_duplicate_",
+                direction="IN",
+            )
+            for out_message in out_messages:
+                self.assertEqual(out_message.status, "S")
 
         with override_settings(PYAS2={"ERROR_ON_DUPLICATE": True}):
             importlib.reload(settings)
