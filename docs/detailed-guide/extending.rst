@@ -40,7 +40,7 @@ This has now created a new directory containing files that may be used for apps:
 
 In our example, we will add a new admin command that should monitor directories and trigger
 the sending of files to partners when they are written. For that purpose, we need to create
-another subfolder "management" and a python file with the management command:
+some subfolders "management/commands" and a python file with the management command:
 
 .. code-block:: console
 
@@ -52,7 +52,8 @@ another subfolder "management" and a python file with the management command:
             ├── tests.py
             ├── views.py
             └── management
-                └── filewatcher.py
+                └── commands
+                    └── filewatcher.py
 
 Add ``extend_pyas2`` to your ``INSTALLED_APPS`` settings, after ``pyas2``.
 
@@ -170,14 +171,16 @@ command:
 
             for partner in Partner.objects.all():
                 for org in Organization.objects.all():
-                    dir_watch_data.append({})
-                    dir_watch_data[-1]['path'] = os.path.join(settings.DATA_DIR,
-                                                              'messages',
-                                                              partner.as2_name,
-                                                              'outbox',
-                                                              org.as2_name)
-                    dir_watch_data[-1]['organization'] = org.as2_name
-                    dir_watch_data[-1]['partner'] = partner.as2_name
+                    outboxDir  = os.path.join(settings.DATA_DIR,
+                                          'messages',
+                                          partner.as2_name,
+                                          'outbox',
+                                          org.as2_name)
+                    if os.path.isdir(outboxDir):
+                        dir_watch_data.append({})
+                        dir_watch_data[-1]['path'] = outboxDir
+                        dir_watch_data[-1]['organization'] = org.as2_name
+                        dir_watch_data[-1]['partner'] = partner.as2_name
 
             if not dir_watch_data:
                 logger.error(_(u'No partners have been configured!'))
