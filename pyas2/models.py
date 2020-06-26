@@ -79,7 +79,14 @@ class Organization(models.Model):
     as2_name = models.CharField(
         verbose_name=_("AS2 Identifier"), max_length=100, primary_key=True
     )
-    email_address = models.EmailField(null=True, blank=True)
+    email_address = models.EmailField(
+        null=True,
+        blank=True,
+        help_text=_(
+            "This email will be used for the Disposition-Notification-To "
+            "header. If left blank, header defaults to: no-reply@pyas2.com"
+        ),
+    )
     encryption_key = models.ForeignKey(
         PrivateKey, null=True, blank=True, on_delete=models.SET_NULL
     )
