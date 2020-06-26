@@ -244,7 +244,7 @@ class Partner(models.Model):
         blank=True,
         help_text=_(
             "Command executed after successful message send, replacements are "
-            "$filename, $sender, $recevier, $messageid and any message header "
+            "$filename, $sender, $receiver, $messageid and any message header "
             "such as $Subject"
         ),
     )
@@ -254,7 +254,7 @@ class Partner(models.Model):
         blank=True,
         help_text=_(
             "Command executed after successful message receipt, replacements "
-            "are $filename, $fullfilename, $sender, $recevier, $messageid and "
+            "are $filename, $fullfilename, $sender, $receiver, $messageid and "
             "any message header such as $Subject"
         ),
     )
