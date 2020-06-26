@@ -48,6 +48,25 @@ The structure of the directory is below:
 
     {DATA DIRECTORY}
     └── messages
+        ├── __store
+        │   ├── mdn
+        │   │   ├── received
+        │   │   └── sent
+        │   │       ├── 20150908
+        │   │       │   ├── 20150908115337.7244.44635@Abhisheks-MacBook-Air.local.mdn
+        │   │       │   └── 20150908121942.7244.71894@Abhisheks-MacBook-Air.local.mdn
+        │   │       └── 20150913
+        │   │           ├── 20150913071324.20065.47671@Abhisheks-MacBook-Air.local.mdn
+        │   │           └── 20150913083125.20403.32480@Abhisheks-MacBook-Air.local.mdn
+        │   └── payload
+        │       ├── received
+        │       │   ├── 20150908
+        │       │   │   ├── 20150908115458.7255.98107@Abhisheks-MacBook-Air.local
+        │       │   │   └── 20150908121933.7343.83150@Abhisheks-MacBook-Air.local
+        │       │   └── 20150913
+        │       │       ├── 20150913071323.20074.48016@Abhisheks-MacBook-Air.local
+        │       │       └── 20150913083125.20475.14667@Abhisheks-MacBook-Air.local
+        │       └── sent
         ├── p1as2
         │   └── outbox
         │       └── p2as2
@@ -64,5 +83,10 @@ We need to take this location into account when integrating ``django-pyas2`` wit
 
 outbox
 ------
-The outbox folder works in conjecture with the ``sendas2bulk`` process. The bulk process looks in all the outbox
-folder and will trigger a transfer for each file found. The path of this  directory is ``{DATA DIRECTORY}/messages/{PARTNER AS2 ID}/outbox/{ORG AS2 ID}``.
+The outbox directory works in conjunction with the ``sendas2bulk`` process. The bulk process looks in all of the outbox
+directories and will trigger a transfer for each file found. The path of this  directory is ``{DATA DIRECTORY}/messages/{PARTNER AS2 ID}/outbox/{ORG AS2 ID}``.
+
+__store
+------
+The __store directory contains the payloads and MDNs. The payload and MDN files are stored in the sent and received sub-directories respectively, and are further seperated by additional sub-directories for each day, named as YYYYMMDD.
+
