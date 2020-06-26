@@ -54,12 +54,17 @@ class Command(BaseCommand):
         original_filename = os.path.basename(options["path_to_payload"])
         with default_storage.open(options["path_to_payload"], "rb") as in_file:
             payload = in_file.read()
+            orgEmailAddr = org.email_address
+            if not orgEmailAddr:
+                orgEmailAddr = "no-reply@pyas2.com"
+
             as2message = AS2Message(sender=org.as2org, receiver=partner.as2partner)
             as2message.build(
                 payload,
                 filename=original_filename,
                 subject=partner.subject,
                 content_type=partner.content_type,
+                disposition_notification_to=orgEmailAddr,
             )
         message, _ = Message.objects.create_from_as2message(
             as2message=as2message,
