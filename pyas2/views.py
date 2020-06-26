@@ -208,6 +208,10 @@ class SendAs2Message(FormView):
     def form_valid(self, form):
         # Send the file to the partner
         payload = form.cleaned_data["file"].read()
+        orgEmailAddr = form.cleaned_data["organization"].email_address
+        if not orgEmailAddr:
+            orgEmailAddr = "no-reply@pyas2.com"
+
         as2message = As2Message(
             sender=form.cleaned_data["organization"].as2org,
             receiver=form.cleaned_data["partner"].as2partner,
@@ -221,6 +225,7 @@ class SendAs2Message(FormView):
             filename=form.cleaned_data["file"].name,
             subject=form.cleaned_data["partner"].subject,
             content_type=form.cleaned_data["partner"].content_type,
+            disposition_notification_to=orgEmailAddr,
         )
 
         message, _ = Message.objects.create_from_as2message(
