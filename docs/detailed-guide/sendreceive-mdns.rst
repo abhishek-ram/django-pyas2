@@ -13,10 +13,10 @@ Send MDNs
 ---------
 The choice of whether to send an MDN and its transfer mode is with the sender of the AS2 message. The sender lets us know what
 to do through an AS2 header field. In case the partner requests a synchronous MDN no action is needed as ``django-pyas2``
-takes care of this internally, however in the case of an asynchronous MDN the admin command ``sendasyncmdn`` needs to be
+takes care of this internally, however in the case of an asynchronous MDN the admin command ``manageas2server --async-mdns`` needs to be
 run to send the MDN to the trading partner.
 
-The command ``{PYTHONPATH}/python {DJANGOPROJECTPATH}/manage.py sendasyncmdn`` should be scheduled every 10 minutes so
+The command ``{PYTHONPATH}/python {DJANGOPROJECTPATH}/manage.py manageas2server --async-mdns`` should be scheduled every 10 minutes so
 that ``django-pyas2`` sends any pending asynchronous MDN requests received from your trading partners.
 
 Receive MDNs
@@ -29,4 +29,4 @@ In the case of asynchronous mode we do need to take care of a couple of details 
 The :doc:`global setting<configuration>` ``MDNURL`` should be set to the URL ``http://{hostname}:{port}/pyas2/as2receive``
 so that the trading partner knows where to send the MDN. The other setting of note here is the ``ASYNCMDNWAIT``
 that decides how long ``django-pyas2`` waits for an MDN before setting the message as failed so that it can be retried. The admin
-command ``sendasyncmdn`` makes this check for all pending messages so it must be scheduled to run regularly.
+command ``manageas2server --async-mdns`` makes this check for all pending messages so it must be scheduled to run regularly.
