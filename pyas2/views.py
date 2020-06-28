@@ -221,7 +221,8 @@ class SendAs2Message(FormView):
             filename=form.cleaned_data["file"].name,
             subject=form.cleaned_data["partner"].subject,
             content_type=form.cleaned_data["partner"].content_type,
-            disposition_notification_to=form.cleaned_data["organization"].email_address or "no-reply@pyas2.com",
+            disposition_notification_to=form.cleaned_data["organization"].email_address
+            or "no-reply@pyas2.com",
         )
 
         message, _ = Message.objects.create_from_as2message(
