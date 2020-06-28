@@ -64,7 +64,7 @@ class Command(BaseCommand):
                 filename=original_filename,
                 subject=partner.subject,
                 content_type=partner.content_type,
-                disposition_notification_to=orgEmailAddr,
+                disposition_notification_to=org.email_address or "no-reply@pyas2.com",
             )
         message, _ = Message.objects.create_from_as2message(
             as2message=as2message,
