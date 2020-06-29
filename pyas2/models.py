@@ -23,6 +23,7 @@ from pyas2lib.utils import extract_certificate_info
 
 from pyas2 import settings
 from pyas2.utils import run_post_send
+from pyas2.utils import notify_error
 
 logger = logging.getLogger("pyas2")
 
@@ -511,6 +512,7 @@ class Message(models.Model):
                     self.detailed_status = (
                         f"Partner failed to process message: {mdn_detailed_status}"
                     )
+                    notify_error(self)
                 if mdn_detailed_status != "mdn-not-found":
                     Mdn.objects.create_from_as2mdn(
                         as2mdn=as2mdn, message=self, status="R"
