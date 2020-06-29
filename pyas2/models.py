@@ -79,7 +79,14 @@ class Organization(models.Model):
     as2_name = models.CharField(
         verbose_name=_("AS2 Identifier"), max_length=100, primary_key=True
     )
-    email_address = models.EmailField(null=True, blank=True)
+    email_address = models.EmailField(
+        null=True,
+        blank=True,
+        help_text=_(
+            "This email will be used for the Disposition-Notification-To "
+            "header. If left blank, header defaults to: no-reply@pyas2.com"
+        ),
+    )
     encryption_key = models.ForeignKey(
         PrivateKey, null=True, blank=True, on_delete=models.SET_NULL
     )
@@ -237,7 +244,7 @@ class Partner(models.Model):
         blank=True,
         help_text=_(
             "Command executed after successful message send, replacements are "
-            "$filename, $sender, $recevier, $messageid and any message header "
+            "$filename, $sender, $receiver, $messageid and any message header "
             "such as $Subject"
         ),
     )
@@ -247,7 +254,7 @@ class Partner(models.Model):
         blank=True,
         help_text=_(
             "Command executed after successful message receipt, replacements "
-            "are $filename, $fullfilename, $sender, $recevier, $messageid and "
+            "are $filename, $fullfilename, $sender, $receiver, $messageid and "
             "any message header such as $Subject"
         ),
     )

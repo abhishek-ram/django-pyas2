@@ -82,11 +82,11 @@ Field Name                      Description                                     
                                 unique names.
 ``Command on Message Send``     OS Command executed after successful message send,     No
                                 replacements are ``$filename``, ``$sender``,
-                                ``$recevier``, ``$messageid`` and any message header
+                                ``$receiver``, ``$messageid`` and any message header
                                 such as ``$Subject``
 ``Command on Message Receipt``  OS Command executed after successful message receipt,  No
                                 replacements are ``$filename``, ``$fullfilename``,
-                                ``$sender``, ``$recevier``, ``$messageid`` and any
+                                ``$sender``, ``$receiver``, ``$messageid`` and any
                                 message header such as ``$Subject``.
 ==============================  =====================================================  =========
 
