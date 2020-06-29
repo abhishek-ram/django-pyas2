@@ -71,7 +71,7 @@ def notify_error(message):
                 "org": message.organization,
                 "prt": message.partner,
                 "dir": message.get_direction_display(),
-                "stat": message.detailed_status
+                "stat": message.detailed_status,
             }
         )
         mail_managers(
