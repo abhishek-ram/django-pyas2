@@ -113,6 +113,7 @@ class ReceiveAs2Message(View):
                 message.detailed_status = (
                     f"Partner failed to process message: {detailed_status}"
                 )
+                notify_error(message)
             # Save the message and create the mdn
             message.save()
             Mdn.objects.create_from_as2mdn(as2mdn=as2mdn, message=message, status="R")
@@ -247,7 +248,6 @@ class SendAs2Message(FormView):
                 self.request,
                 "Message transmission failed, check Messages tab for details.",
             )
-            notify_error(message)
         return super(SendAs2Message, self).form_valid(form)
 
 
