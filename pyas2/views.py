@@ -24,6 +24,7 @@ from pyas2.models import PrivateKey
 from pyas2.models import PublicCertificate
 from pyas2.utils import run_post_receive
 from pyas2.utils import run_post_send
+from pyas2.utils import notify_error
 from pyas2.forms import SendAs2MessageForm
 
 logger = logging.getLogger("pyas2")
@@ -242,6 +243,7 @@ class SendAs2Message(FormView):
                 self.request,
                 "Message transmission failed, check Messages tab for details.",
             )
+            notify_error(message)
         return super(SendAs2Message, self).form_valid(form)
 
 
