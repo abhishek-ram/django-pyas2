@@ -153,7 +153,7 @@ class ReceiveAs2Message(View):
             # run post receive command on success
             if status == "processed":
                 run_post_receive(message, full_fn)
-                
+
             # notify of error
             if message.status == "E":
                 notify_error(message)
