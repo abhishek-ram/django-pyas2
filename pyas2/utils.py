@@ -56,24 +56,26 @@ def notify_error(message):
     """ Notify via email about errors with transmission of messages """
 
     try:
-        email_subject = 'pyAS2 Error'
-        email_body = 'Error: Message transmission failed!' \
-                      '\n\nMessage ID: %(id)s' \
-                      '\nDate/Time: %(time)s' \
-                      '\nOrganization: %(org)s' \
-                      '\nPartner: %(prt)s' \
-                      '\nDirection: %(dir)s' \
-                      '\nDetailed Status: %(stat)s' \
-                      % {'id': message.message_id,
-                         'time': localtime(message.timestamp).strftime('%Y-%m-%d %H:%M:%S'),
-                         'org': message.organization,
-                         'prt': message.partner,
-                         'dir': message.get_direction_display(),
-                         'stat': message.detailed_status}
+        email_subject = "pyAS2 Error"
+        email_body = (
+            "Error: Message transmission failed!"
+            "\n\nMessage ID: %(id)s"
+            "\nDate/Time: %(time)s"
+            "\nOrganization: %(org)s"
+            "\nPartner: %(prt)s"
+            "\nDirection: %(dir)s"
+            "\nDetailed Status: %(stat)s"
+            % {
+                "id": message.message_id,
+                "time": localtime(message.timestamp).strftime("%Y-%m-%d %H:%M:%S"),
+                "org": message.organization,
+                "prt": message.partner,
+                "dir": message.get_direction_display(),
+                "stat": message.detailed_status
+            }
+        )
         mail_managers(
-            email_subject,
-            email_body,
-            fail_silently=False,
+            email_subject, email_body, fail_silently=False,
         )
     except Exception as msg:
-        logger.warning("Error sending email notification: %(msg)s", {'msg': msg})
+        logger.warning("Error sending email notification: %(msg)s", {"msg": msg})
