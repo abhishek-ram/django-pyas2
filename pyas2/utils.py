@@ -76,4 +76,4 @@ def notify_error(message):
             fail_silently=False,
         )
     except Exception as msg:
-        logger.warning("Error sending email notification: %(msg)s", {'msg': msg}
+        logger.warning("Error sending email notification: %(msg)s", {'msg': msg})
