@@ -76,6 +76,14 @@
           </p>
         </div>
       </div>
+      {% if original.retries %}
+        <div class="form-row field-name">
+          <div>
+            <label class="required" >Retries:</label>
+            <p>{{ original.retries }}</p>
+          </div>
+        </div>
+      {% endif %}
       {% if original.detailed_status %}
         <div class="form-row field-name">
           <div>

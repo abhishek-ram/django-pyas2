@@ -55,7 +55,7 @@ class Command(BaseCommand):
                 if not failed_msg.retries:
                     failed_msg.retries = 1
                 else:
-                    failed_msg.retries += failed_msg.retries
+                    failed_msg.retries += 1
 
                 # if max retries has exceeded then mark message status as error
                 if failed_msg.retries > settings.MAX_RETRIES:
