@@ -134,6 +134,7 @@ class Partner(models.Model):
         ("application/EDIFACT", "application/EDIFACT"),
         ("application/edi-consent", "application/edi-consent"),
         ("application/XML", "application/XML"),
+        ("application/octet-stream", "binary"),
     )
     ENCRYPT_ALG_CHOICES = (
         ("tripledes_192_cbc", "3DES"),
