@@ -16,6 +16,8 @@ from pyas2.forms import PartnerForm
 from pyas2.forms import PublicCertificateForm
 from pyas2.forms import PrivateKeyForm
 
+from pyas2.utils import pyas2Utils
+
 
 @admin.register(PrivateKey)
 class PrivateKeyAdmin(admin.ModelAdmin):
@@ -62,6 +64,7 @@ class PartnerAdmin(admin.ModelAdmin):
         "mdn_mode",
     ]
     list_filter = ("name", "as2_name")
+
     fieldsets = (
         (
             None,
@@ -124,6 +127,18 @@ class PartnerAdmin(admin.ModelAdmin):
         return HttpResponseRedirect(
             reverse_lazy("as2-send") + "?partner_id=%s" % partner.as2_name
         )
+
+    def get_readonly_fields(self, request, queryset):
+        readOnlyFields = []
+        if pyas2Utils.cust_run_post_send:
+            readOnlyFields.append("cmd_send")
+        if pyas2Utils.cust_run_post_receive:
+            readOnlyFields.append("cmd_receive")
+
+        if readOnlyFields:
+            a = super().get_fieldsets(request, queryset)
+            a[4][1]['description'] = "<b>Note: fields <i>%s</i> shown as readonly because customized function was linked</b>" % (", ".join(readOnlyFields))
+        return readOnlyFields
 
     send_message.short_description = "Send a message to the selected partner"
 

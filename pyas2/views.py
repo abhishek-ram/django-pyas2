@@ -22,8 +22,7 @@ from pyas2.models import Organization
 from pyas2.models import Partner
 from pyas2.models import PrivateKey
 from pyas2.models import PublicCertificate
-from pyas2.utils import run_post_receive
-from pyas2.utils import run_post_send
+from pyas2.utils import pyas2Utils
 from pyas2.forms import SendAs2MessageForm
 
 logger = logging.getLogger("pyas2")
@@ -106,7 +105,7 @@ class ReceiveAs2Message(View):
             # Update the message status and return the response
             if status == "processed":
                 message.status = "S"
-                run_post_send(message)
+                pyas2Utils.run_post_send(message)
             else:
                 message.status = "E"
                 message.detailed_status = (
@@ -150,7 +149,7 @@ class ReceiveAs2Message(View):
 
             # run post receive command on success
             if status == "processed":
-                run_post_receive(message, full_fn)
+                pyas2Utils.run_post_receive(message, full_fn)
 
             # Return the mdn in case of sync else return text message
             if as2mdn and as2mdn.mdn_mode == "SYNC":

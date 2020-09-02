@@ -22,7 +22,7 @@ from pyas2lib import (
 from pyas2lib.utils import extract_certificate_info
 
 from pyas2 import settings
-from pyas2.utils import run_post_send
+from pyas2.utils import pyas2Utils
 
 logger = logging.getLogger("pyas2")
 
@@ -506,7 +506,7 @@ class Message(models.Model):
                 # Update the message status and return the response
                 if mdn_status == "processed":
                     self.status = "S"
-                    run_post_send(self)
+                    pyas2Utils.run_post_send(self)
                 else:
                     self.status = "E"
                     self.detailed_status = (
