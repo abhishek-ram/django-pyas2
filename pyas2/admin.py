@@ -186,7 +186,7 @@ class MdnAdmin(admin.ModelAdmin):
 
     search_fields = (
         "mdn_id",
-        "message_id",
+        "message__message_id",
     )
     list_display = ("mdn_id", "message", "timestamp", "status")
     list_filter = ("status",)
