@@ -87,6 +87,9 @@ Contribute
 Running Tests
 ~~~~~~~~~~~~~
 
+Install `django-environ` and `pytest` into your environment to support the
+example.settings module and test framework.
+
 To run ``django-pyas2's`` test suite:
 
 ``django-admin.py test pyas2 --settings=example.settings --pythonpath=.``
