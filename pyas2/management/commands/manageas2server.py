@@ -56,22 +56,17 @@ class Command(BaseCommand):
                     "Failed to receive asynchronous MDN within the threshold limit."
                 )
             elif retry_msg.status == "R":
-                retry_msg.detailed_status = (
-                    "Retry count exceeded the limit."
-                )
+                retry_msg.detailed_status = "Retry count exceeded the limit."
 
             retry_msg.status = "E"
             retry_msg.save()
             return
 
-        self.stdout.write(
-            "Retry send the message with ID %s" % retry_msg.message_id
-        )
+        self.stdout.write("Retry send the message with ID %s" % retry_msg.message_id)
 
         # Build and resend the AS2 message
         as2message = AS2Message(
-            sender=retry_msg.organization.as2org,
-            receiver=retry_msg.partner.as2partner,
+            sender=retry_msg.organization.as2org, receiver=retry_msg.partner.as2partner,
         )
         as2message.build(
             retry_msg.payload.read(),
