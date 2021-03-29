@@ -1,3 +1,3 @@
-pyas2lib==1.3.1
+pyas2lib==1.3.3
 requests
-django>=2.1.9
+django>=2.2.18
