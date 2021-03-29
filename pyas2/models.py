@@ -534,7 +534,7 @@ class MdnManager(models.Manager):
         mdn, _ = self.update_or_create(
             message=message,
             defaults=dict(
-                mdn_id=as2mdn.message_id,
+                mdn_id=as2mdn.message_id if as2mdn.message_id is not None else as2mdn.orig_message_id,
                 status=status,
                 signed=signed,
                 return_url=return_url,
