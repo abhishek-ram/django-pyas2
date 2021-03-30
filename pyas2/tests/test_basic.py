@@ -593,8 +593,13 @@ class SendMessageMock(object):
         req_response = Response()
         req_response._content = response.content
 
-        for h_key, h_value in response._headers.values():
-            req_response.headers[h_key] = h_value
+        # Django 3.2 stores headers in headers instead of _headers
+        if hasattr(response, "_headers"):
+            for h_key, h_value in response._headers.values():
+                req_response.headers[h_key] = h_value
+        else:
+            for h_key, h_value in response.headers._store.values():
+                req_response.headers[h_key] = h_value
 
         req_response.status_code = response.status_code
         return req_response
