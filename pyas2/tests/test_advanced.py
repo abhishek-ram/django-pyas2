@@ -117,7 +117,7 @@ class AdvancedTestCases(TestCase):
 
     @mock.patch("requests.post")
     def test_post_send_command_async(self, mock_request):
-        """ Test that the command after successful send gets executed with
+        """Test that the command after successful send gets executed with
         asynchronous MDN."""
 
         partner = Partner.objects.create(

@@ -32,14 +32,14 @@ logger = logging.getLogger("pyas2")
 @method_decorator(csrf_exempt, name="dispatch")
 class ReceiveAs2Message(View):
     """
-       Class receives AS2 requests from partners.
-       Checks whether its an AS2 message or an MDN and acts accordingly.
+    Class receives AS2 requests from partners.
+    Checks whether its an AS2 message or an MDN and acts accordingly.
     """
 
     @staticmethod
     def find_message(message_id, partner_id):
-        """ Find the message using the message_id  and return its
-         pyas2 version"""
+        """Find the message using the message_id  and return its
+        pyas2 version"""
         message = Message.objects.filter(
             message_id=message_id, partner_id=partner_id.strip()
         ).first()
