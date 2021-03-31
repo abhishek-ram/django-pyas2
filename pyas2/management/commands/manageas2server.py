@@ -66,7 +66,8 @@ class Command(BaseCommand):
 
         # Build and resend the AS2 message
         as2message = AS2Message(
-            sender=retry_msg.organization.as2org, receiver=retry_msg.partner.as2partner,
+            sender=retry_msg.organization.as2org,
+            receiver=retry_msg.partner.as2partner,
         )
         as2message.build(
             retry_msg.payload.read(),
