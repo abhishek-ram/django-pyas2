@@ -94,8 +94,8 @@ class BasicServerClientTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def testNoEncryptMessageNoMdn(self):
-        """ Test Permutation 1: Sender sends un-encrypted data and does
-        NOT request a receipt. """
+        """Test Permutation 1: Sender sends un-encrypted data and does
+        NOT request a receipt."""
 
         # Create the partner with appropriate settings for this case
         partner = Partner.objects.create(
@@ -119,8 +119,8 @@ class BasicServerClientTestCase(TestCase):
         )
 
     def testNoEncryptMessageMdn(self):
-        """ Test Permutation 2: Sender sends un-encrypted data and requests an
-        unsigned receipt. """
+        """Test Permutation 2: Sender sends un-encrypted data and requests an
+        unsigned receipt."""
 
         # Create the partner with appropriate settings for this case
         partner = Partner.objects.create(
@@ -147,8 +147,8 @@ class BasicServerClientTestCase(TestCase):
         )
 
     def testNoEncryptMessageSignMdn(self):
-        """ Test Permutation 3: Sender sends un-encrypted data and requests a
-        signed receipt. """
+        """Test Permutation 3: Sender sends un-encrypted data and requests a
+        signed receipt."""
 
         # Create the partner with appropriate settings for this case
         partner = Partner.objects.create(
@@ -177,8 +177,8 @@ class BasicServerClientTestCase(TestCase):
         )
 
     def testEncryptMessageNoMdn(self):
-        """ Test Permutation 4: Sender sends encrypted data and does NOT
-        request a receipt. """
+        """Test Permutation 4: Sender sends encrypted data and does NOT
+        request a receipt."""
 
         # Create the partner with appropriate settings for this case
         partner = Partner.objects.create(
@@ -204,8 +204,8 @@ class BasicServerClientTestCase(TestCase):
         )
 
     def testEncryptMessageMdn(self):
-        """ Test Permutation 5: Sender sends encrypted data and requests an
-         unsigned receipt. """
+        """Test Permutation 5: Sender sends encrypted data and requests an
+        unsigned receipt."""
 
         partner = Partner.objects.create(
             name="AS2 Server",
@@ -233,8 +233,8 @@ class BasicServerClientTestCase(TestCase):
         )
 
     def testEncryptMessageSignMdn(self):
-        """ Test Permutation 6: Sender sends encrypted data and requests
-        an signed receipt. """
+        """Test Permutation 6: Sender sends encrypted data and requests
+        an signed receipt."""
 
         partner = Partner.objects.create(
             name="AS2 Server",
@@ -265,8 +265,8 @@ class BasicServerClientTestCase(TestCase):
         )
 
     def testSignMessageNoMdn(self):
-        """ Test Permutation 7: Sender sends signed data and does NOT request
-         a receipt. """
+        """Test Permutation 7: Sender sends signed data and does NOT request
+        a receipt."""
 
         partner = Partner.objects.create(
             name="AS2 Server",
@@ -291,8 +291,8 @@ class BasicServerClientTestCase(TestCase):
         )
 
     def testSignMessageMdn(self):
-        """ Test Permutation 8: Sender sends signed data and requests an
-        unsigned receipt. """
+        """Test Permutation 8: Sender sends signed data and requests an
+        unsigned receipt."""
 
         partner = Partner.objects.create(
             name="AS2 Server",
@@ -320,8 +320,8 @@ class BasicServerClientTestCase(TestCase):
         )
 
     def testSignMessageSignMdn(self):
-        """ Test Permutation 9: Sender sends signed data and requests a
-         signed receipt. """
+        """Test Permutation 9: Sender sends signed data and requests a
+        signed receipt."""
 
         partner = Partner.objects.create(
             name="AS2 Server",
@@ -351,8 +351,8 @@ class BasicServerClientTestCase(TestCase):
         )
 
     def testEncryptSignMessageNoMdn(self):
-        """ Test Permutation 10: Sender sends encrypted and signed data and
-        does NOT request a receipt. """
+        """Test Permutation 10: Sender sends encrypted and signed data and
+        does NOT request a receipt."""
 
         partner = Partner.objects.create(
             name="AS2 Server",
@@ -380,8 +380,8 @@ class BasicServerClientTestCase(TestCase):
         )
 
     def testEncryptSignMessageMdn(self):
-        """ Test Permutation 11: Sender sends encrypted and signed data and
-        requests an unsigned receipt. """
+        """Test Permutation 11: Sender sends encrypted and signed data and
+        requests an unsigned receipt."""
 
         partner = Partner.objects.create(
             name="AS2 Server",
@@ -412,8 +412,8 @@ class BasicServerClientTestCase(TestCase):
         )
 
     def testEncryptSignMessageSignMdn(self):
-        """ Test Permutation 12: Sender sends encrypted and signed data and
-        requests a signed receipt. """
+        """Test Permutation 12: Sender sends encrypted and signed data and
+        requests a signed receipt."""
 
         partner = Partner.objects.create(
             name="AS2 Server",
@@ -446,8 +446,8 @@ class BasicServerClientTestCase(TestCase):
         )
 
     def testCompressEncryptSignMessageSignMdn(self):
-        """ Test Permutation 13: Sender sends compressed, encrypted and signed
-         data and requests an signed receipt. """
+        """Test Permutation 13: Sender sends compressed, encrypted and signed
+        data and requests an signed receipt."""
 
         partner = Partner.objects.create(
             name="AS2 Server",
@@ -483,8 +483,8 @@ class BasicServerClientTestCase(TestCase):
 
     @mock.patch("requests.post")
     def testEncryptSignMessageAsyncSignMdn(self, mock_request):
-        """ Test Permutation 14: Sender sends encrypted and signed data and
-        requests an Asynchronous signed receipt. """
+        """Test Permutation 14: Sender sends encrypted and signed data and
+        requests an Asynchronous signed receipt."""
 
         partner = Partner.objects.create(
             name="AS2 Server",
@@ -593,8 +593,13 @@ class SendMessageMock(object):
         req_response = Response()
         req_response._content = response.content
 
-        for h_key, h_value in response._headers.values():
-            req_response.headers[h_key] = h_value
+        # Django 3.2 stores headers in headers instead of _headers
+        if hasattr(response, "_headers"):
+            for h_key, h_value in response._headers.values():
+                req_response.headers[h_key] = h_value
+        else:
+            for h_key, h_value in response.headers._store.values():
+                req_response.headers[h_key] = h_value
 
         req_response.status_code = response.status_code
         return req_response
