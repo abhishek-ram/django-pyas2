@@ -8,7 +8,7 @@ install:
   - python setup.py install
   - pip install -r requirements/test.txt
 script:
-  - pytest --cov-report term --cov-config .coveragerc --cov=pyas2 --black pyas2
+  - pytest --cov-report term --cov-config .coveragerc --cov=pyas2 --black --pylama pyas2
 after_success:
   - pip install codecov
   - codecov
