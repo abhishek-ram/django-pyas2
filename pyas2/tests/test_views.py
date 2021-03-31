@@ -24,7 +24,9 @@ class TestDownloadFileView(TestCase):
 
         with open(os.path.join(TEST_DIR, "testmessage.edi"), "rb") as fp:
             self.message = Message.objects.create(
-                message_id="some-message-id", direction="IN", status="S",
+                message_id="some-message-id",
+                direction="IN",
+                status="S",
             )
             self.message.payload.save("testmessage.edi", fp)
             self.mdn = Mdn.objects.create(

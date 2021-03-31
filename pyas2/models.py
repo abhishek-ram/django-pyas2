@@ -11,7 +11,7 @@ from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.db import models
 from django.utils import timezone
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 from pyas2lib import (
     Mdn as As2Mdn,
@@ -531,10 +531,21 @@ class MdnManager(models.Manager):
     def create_from_as2mdn(self, as2mdn, message, status, return_url=None):
         """Create the MDN from the pyas2lib's MDN object"""
         signed = True if as2mdn.digest_alg else False
+
+        # Check for message-id in MDN.
+        if as2mdn.message_id is None:
+            message_id = as2mdn.orig_message_id
+            logger.warning(
+                f"Received MDN response without a message-id. Using original "
+                f"message-id as ID instead: {message_id}"
+            )
+        else:
+            message_id = as2mdn.message_id
+
         mdn, _ = self.update_or_create(
             message=message,
             defaults=dict(
-                mdn_id=as2mdn.message_id,
+                mdn_id=message_id,
                 status=status,
                 signed=signed,
                 return_url=return_url,

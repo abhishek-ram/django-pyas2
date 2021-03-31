@@ -7,8 +7,8 @@ logger = logging.getLogger("pyas2")
 
 
 def run_post_send(message):
-    """ Execute command after successful send, can be used to notify
-    successful sends """
+    """Execute command after successful send, can be used to notify
+    successful sends"""
 
     command = message.partner.cmd_send
     if command:
@@ -28,7 +28,7 @@ def run_post_send(message):
 
 
 def run_post_receive(message, full_filename):
-    """ Execute command after successful receive, can be used to call the
+    """Execute command after successful receive, can be used to call the
     edi program for further processing"""
 
     command = message.partner.cmd_receive

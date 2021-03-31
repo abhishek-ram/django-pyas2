@@ -367,7 +367,9 @@ class Migration(migrations.Migration):
                     ),
                 ),
             ],
-            options={"unique_together": {("message_id", "partner")},},
+            options={
+                "unique_together": {("message_id", "partner")},
+            },
         ),
         migrations.CreateModel(
             name="Mdn",
