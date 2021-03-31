@@ -545,7 +545,10 @@ class MdnManager(models.Manager):
         mdn, _ = self.update_or_create(
             message=message,
             defaults=dict(
-                mdn_id=message_id, status=status, signed=signed, return_url=return_url,
+                mdn_id=message_id,
+                status=status,
+                signed=signed,
+                return_url=return_url,
             ),
         )
         filename = f"{uuid4()}.mdn"
