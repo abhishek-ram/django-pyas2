@@ -42,6 +42,41 @@ class Command(BaseCommand):
             help="Handle sending and receiving of Asynchronous MDNs.",
         )
 
+    def retry(self, retry_msg):
+        # Increase the retry count
+        if not retry_msg.retries:
+            retry_msg.retries = 1
+        else:
+            retry_msg.retries += 1
+
+        # if max retries has exceeded then mark message status as error
+        if retry_msg.retries > settings.MAX_RETRIES:
+            if retry_msg.status == "P":
+                retry_msg.detailed_status = (
+                    "Failed to receive asynchronous MDN within the threshold limit."
+                )
+            elif retry_msg.status == "R":
+                retry_msg.detailed_status = "Retry count exceeded the limit."
+
+            retry_msg.status = "E"
+            retry_msg.save()
+            return
+
+        self.stdout.write("Retry send the message with ID %s" % retry_msg.message_id)
+
+        # Build and resend the AS2 message
+        as2message = AS2Message(
+            sender=retry_msg.organization.as2org,
+            receiver=retry_msg.partner.as2partner,
+        )
+        as2message.build(
+            retry_msg.payload.read(),
+            filename=os.path.basename(retry_msg.payload.name),
+            subject=retry_msg.partner.subject,
+            content_type=retry_msg.partner.content_type,
+        )
+        retry_msg.send_message(as2message.headers, as2message.content)
+
     def handle(self, *args, **options):
 
         if options["retry"]:
@@ -50,35 +85,7 @@ class Command(BaseCommand):
             failed_msgs = Message.objects.filter(status="R", direction="OUT")
 
             for failed_msg in failed_msgs:
-
-                # Increase the retry count
-                if not failed_msg.retries:
-                    failed_msg.retries = 1
-                else:
-                    failed_msg.retries += 1
-
-                # if max retries has exceeded then mark message status as error
-                if failed_msg.retries > settings.MAX_RETRIES:
-                    failed_msg.status = "E"
-                    failed_msg.save()
-                    continue
-
-                self.stdout.write(
-                    "Retry send the message with ID %s" % failed_msg.message_id
-                )
-
-                # Build and resend the AS2 message
-                as2message = AS2Message(
-                    sender=failed_msg.organization.as2org,
-                    receiver=failed_msg.partner.as2partner,
-                )
-                as2message.build(
-                    failed_msg.payload.read(),
-                    filename=os.path.basename(failed_msg.payload.name),
-                    subject=failed_msg.partner.subject,
-                    content_type=failed_msg.partner.content_type,
-                )
-                failed_msg.send_message(as2message.headers, as2message.content)
+                self.retry(failed_msg)
 
             self.stdout.write("Processed all failed outbound messages")
 
@@ -135,13 +142,9 @@ class Command(BaseCommand):
                 status="P", direction="OUT", timestamp__lt=time_threshold
             )
 
-            # Mark these messages as erred
+            # Retry sending the message if not MDN received.
             for pending_msg in out_pending_msgs:
-                pending_msg.status = "E"
-                pending_msg.detailed_status = (
-                    "Failed to receive asynchronous MDN within the " "threshold limit."
-                )
-                pending_msg.save()
+                self.retry(pending_msg)
 
             self.stdout.write(u"Successfully processed all pending mdns.")
 

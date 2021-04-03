@@ -122,7 +122,17 @@ def test_manageserver_command(mocker, organization, partner):
     assert out_message.retries == 2
     assert out_message.status == "E"
 
-    # Test the async mdn command for outbound messages
+    # Test the async mdn command for outbound messages, retry when no MDN received
+    app_settings.ASYNC_MDN_WAIT = 0
+    out_message.status = "P"
+    out_message.retries = 0
+    out_message.save()
+    management.call_command("manageas2server", async_mdns=True)
+    out_message.refresh_from_db()
+    assert out_message.status == "R"
+    assert out_message.retries == 1
+
+    # Test the async mdn command for outbound messages, finally fail when no MDN received
     app_settings.ASYNC_MDN_WAIT = 0
     out_message.status = "P"
     out_message.save()
