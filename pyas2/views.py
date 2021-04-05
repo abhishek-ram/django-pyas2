@@ -12,6 +12,7 @@ from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.generic import FormView
+from django.utils.crypto import get_random_string
 from pyas2lib import Message as As2Message
 from pyas2lib import Mdn as As2Mdn
 from pyas2lib.exceptions import DuplicateDocument
@@ -25,6 +26,7 @@ from pyas2.models import PublicCertificate
 from pyas2.utils import run_post_receive
 from pyas2.utils import run_post_send
 from pyas2.forms import SendAs2MessageForm
+from pyas2 import settings
 
 logger = logging.getLogger("pyas2")
 
@@ -47,7 +49,19 @@ class ReceiveAs2Message(View):
             return message.as2message
 
     @staticmethod
-    def check_message_exists(message_id, partner_id):
+    def check_success_message_exists(message_id, partner_id):
+        """ Check if the message already exists in the system """
+        if settings.ERROR_ON_DUPLICATE:
+            return Message.objects.filter(
+                message_id=message_id,
+                partner_id=partner_id.strip(),
+                status__in=("S", "P"),
+            ).exists()
+        else:
+            return False
+
+    @staticmethod
+    def check_same_message_exists(message_id, partner_id):
         """ Check if the message already exists in the system """
         return Message.objects.filter(
             message_id=message_id, partner_id=partner_id.strip()
@@ -125,7 +139,7 @@ class ReceiveAs2Message(View):
                 request_body,
                 self.find_organization,
                 self.find_partner,
-                self.check_message_exists,
+                self.check_success_message_exists,
             )
 
             logger.info(
@@ -135,8 +149,14 @@ class ReceiveAs2Message(View):
             )
 
             # In case of duplicates update message id
-            if isinstance(exception[0], DuplicateDocument):
-                as2message.message_id += "_duplicate"
+            if isinstance(exception[0], DuplicateDocument) or (
+                not settings.ERROR_ON_DUPLICATE
+                and self.check_same_message_exists(
+                    message_id=as2message.message_id,
+                    partner_id=as2message.sender.as2_name,
+                )
+            ):
+                as2message.message_id += "_duplicate_" + get_random_string(5)
 
             # Create the Message and MDN objects
             message, full_fn = Message.objects.create_from_as2message(

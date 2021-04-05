@@ -258,9 +258,88 @@ class AdvancedTestCases(TestCase):
         # Make sure out message was created
         self.assertEqual(in_message.status, "E")
         out_message = Message.objects.get(
-            message_id=in_message.message_id + "_duplicate", direction="IN"
+            message_id__startswith=in_message.message_id + "_duplicate_", direction="IN"
         )
         self.assertEqual(out_message.status, "E")
+
+        # send it a third time to cause another duplicate error
+        in_message.send_message(as2message.headers, as2message.content)
+
+        # Make sure out message was created
+        self.assertEqual(in_message.status, "E")
+        out_messages = Message.objects.filter(
+            message_id__startswith=in_message.message_id + "_duplicate_", direction="IN"
+        )
+        for out_message in out_messages:
+            self.assertEqual(out_message.status, "E")
+
+    @mock.patch("requests.post")
+    def test_duplicate_success(self, mock_request):
+        with override_settings(PYAS2={"ERROR_ON_DUPLICATE": False}):
+            importlib.reload(settings)
+            partner = Partner.objects.create(
+                name="AS2 Server",
+                as2_name="as2server",
+                target_url="http://localhost:8080/pyas2/as2receive",
+                signature="sha1",
+                signature_cert=self.server_crt,
+                encryption="tripledes_192_cbc",
+                encryption_cert=self.server_crt,
+                mdn=True,
+                mdn_mode="SYNC",
+                mdn_sign="sha1",
+            )
+
+            # Send the message once
+            as2message = As2Message(
+                sender=self.organization.as2org, receiver=partner.as2partner
+            )
+            as2message.build(
+                self.payload,
+                filename="testmessage.edi",
+                subject=partner.subject,
+                content_type=partner.content_type,
+            )
+            in_message, _ = Message.objects.create_from_as2message(
+                as2message=as2message, payload=self.payload, direction="OUT", status="P"
+            )
+
+            mock_request.side_effect = SendMessageMock(self.client)
+            in_message.send_message(as2message.headers, as2message.content)
+
+            # Check the status of the message
+            self.assertEqual(in_message.status, "S")
+            out_message = Message.objects.get(
+                message_id=in_message.message_id, direction="IN"
+            )
+            self.assertEqual(out_message.status, "S")
+
+            # send it again to, should not cause duplicate error
+            in_message.send_message(as2message.headers, as2message.content)
+
+            # Make sure out message was created
+            self.assertEqual(in_message.status, "S")
+            out_message = Message.objects.get(
+                message_id__startswith=in_message.message_id + "_duplicate_",
+                direction="IN",
+            )
+            self.assertEqual(out_message.status, "S")
+
+            # send it again to, should not cause duplicate error, and no create error
+            in_message.send_message(as2message.headers, as2message.content)
+
+            # Make sure out message was created
+            self.assertEqual(in_message.status, "S")
+            out_messages = Message.objects.filter(
+                message_id__startswith=in_message.message_id + "_duplicate_",
+                direction="IN",
+            )
+            for out_message in out_messages:
+                self.assertEqual(out_message.status, "S")
+
+        with override_settings(PYAS2={"ERROR_ON_DUPLICATE": True}):
+            importlib.reload(settings)
+            self.assertEqual(settings.ERROR_ON_DUPLICATE, True)
 
     def test_org_missing_error(self):
         # Create the client partner and send the command
