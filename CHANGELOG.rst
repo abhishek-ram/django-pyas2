@@ -1,6 +1,14 @@
 Release History
 ===============
 
+1.2.1 - 2021-05-08
+------------------
+
+* Bump version of pyas2lib to 1.3.3
+* Use orig_message_id as Message ID for MDN if no message_id was provided
+* Retry when no ASYNC MDN is received, before finally failing after retries
+* Bump version of django to 2.2.18
+
 1.2.0 - 2020-04-12
 ------------------
 
