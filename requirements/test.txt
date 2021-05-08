@@ -5,4 +5,5 @@ pytest-mock==3.5.1
 pylama==7.7.1
 pylint==2.7.3
 pytest-black==0.3.12
+black==21.5b0
 django-environ==0.4.5

@@ -90,7 +90,7 @@ class AdvancedTestCases(TestCase):
             mdn.payload.delete()
 
     def test_post_send_command(self):
-        """ Test that the command after successful send gets executed."""
+        """Test that the command after successful send gets executed."""
 
         partner = Partner.objects.create(
             name="AS2 Server",
@@ -153,7 +153,7 @@ class AdvancedTestCases(TestCase):
         os.remove(touch_file)
 
     def test_post_receive_command(self):
-        """ Test that the command after successful receive gets executed."""
+        """Test that the command after successful receive gets executed."""
         # settings.DATA_DIR = TEST_DIR
         # add the post receive command and save it
         self.partner.cmd_receive = "touch %s/$filename.received" % TEST_DIR
@@ -185,7 +185,7 @@ class AdvancedTestCases(TestCase):
         # settings.DATA_DIR = None
 
     def test_use_received_filename(self):
-        """ Test using the filename of the payload received while saving the file."""
+        """Test using the filename of the payload received while saving the file."""
 
         # add the post receive command and save it
         self.partner.cmd_receive = "touch %s/$filename.received" % TEST_DIR

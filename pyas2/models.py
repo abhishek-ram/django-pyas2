@@ -109,7 +109,7 @@ class Organization(models.Model):
 
     @property
     def as2org(self):
-        """ Returns an object of pyas2lib's Organization class"""
+        """Returns an object of pyas2lib's Organization class"""
         params = {"as2_name": self.as2_name, "mdn_url": settings.MDN_URL}
         if self.signature_key:
             params["sign_key"] = bytes(self.signature_key.key)
@@ -262,7 +262,7 @@ class Partner(models.Model):
 
     @property
     def as2partner(self):
-        """ Returns an object of pyas2lib's Partner class"""
+        """Returns an object of pyas2lib's Partner class"""
         params = {
             "as2_name": self.as2_name,
             "compress": self.compress,
@@ -414,7 +414,7 @@ class Message(models.Model):
 
     @property
     def as2message(self):
-        """ Returns an object of pyas2lib's Message class"""
+        """Returns an object of pyas2lib's Message class"""
         if self.direction == "IN":
             as2m = As2Message(
                 sender=self.partner.as2partner, receiver=self.organization.as2org
@@ -431,7 +431,7 @@ class Message(models.Model):
 
     @property
     def status_icon(self):
-        """ Return the icon for message status """
+        """Return the icon for message status"""
         if self.status == "S":
             return "admin/img/icon-yes.svg"
         elif self.status == "E":
@@ -442,7 +442,7 @@ class Message(models.Model):
             return "admin/img/icon-unknown.svg"
 
     def send_message(self, header, payload):
-        """ Send the message to the partner"""
+        """Send the message to the partner"""
         logger.info(
             f'Sending message {self.message_id} from organization "{self.organization}" '
             f'to partner "{self.partner}".'
@@ -595,7 +595,7 @@ class Mdn(models.Model):
         return self.mdn_id
 
     def send_async_mdn(self):
-        """ Send the asynchronous MDN to the partner"""
+        """Send the asynchronous MDN to the partner"""
 
         # convert the mdn headers to dictionary
         headers = HeaderParser().parsestr(self.headers.read().decode())

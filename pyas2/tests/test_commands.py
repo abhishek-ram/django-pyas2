@@ -16,7 +16,7 @@ from pyas2.management.commands.sendas2bulk import Command as SendBulkCommand
 
 @pytest.mark.django_db
 def test_sendbulk_command(mocker, partner, organization):
-    """ Test the command for sending all files in the outbox folder """
+    """Test the command for sending all files in the outbox folder"""
     mocked_call_command = mocker.patch(
         "pyas2.management.commands.sendas2bulk.call_command"
     )
@@ -51,7 +51,7 @@ def test_sendbulk_command(mocker, partner, organization):
 
 @pytest.mark.django_db
 def test_sendmessage_command(mocker, organization, partner):
-    """ Test the command for sending an as2 message """
+    """Test the command for sending an as2 message"""
     test_message = os.path.join(TEST_DIR, "testmessage.edi")
 
     # Try to run with invalid org and client

@@ -88,7 +88,7 @@ class BasicServerClientTestCase(TestCase):
             mdn.payload.delete()
 
     def testEndpoint(self):
-        """ Test if the as2 reveive endpoint is active """
+        """Test if the as2 reveive endpoint is active"""
 
         response = self.client.get("/pyas2/as2receive")
         self.assertEqual(response.status_code, 200)
