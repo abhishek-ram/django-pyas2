@@ -1,10 +1,12 @@
 from django.urls import path
 from django.contrib.auth.decorators import login_required
+from django.urls import include, path
 
 from pyas2 import views
 
 
 urlpatterns = [
+    # path('pyas2/', include('pyas2.urls')),
     path("as2receive/", views.ReceiveAs2Message.as_view(), name="as2-receive"),
     # Add the url again without slash for backwards compatibility
     path("as2receive", views.ReceiveAs2Message.as_view(), name="as2-receive"),
