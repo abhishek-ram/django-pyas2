@@ -1,6 +1,6 @@
 import os
 from django import forms
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext_lazy as _
 from pyas2lib import Organization as As2Organization
 from pyas2lib import Partner as As2Partner
 from pyas2lib.exceptions import AS2Exception
