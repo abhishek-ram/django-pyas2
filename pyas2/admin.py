@@ -19,10 +19,12 @@ from pyas2.forms import PrivateKeyForm
 
 @admin.register(PrivateKey)
 class PrivateKeyAdmin(admin.ModelAdmin):
+    """Admin class for the PrivateKey model."""
     form = PrivateKeyForm
     list_display = ("name", "valid_from", "valid_to", "serial_number", "download_key")
 
-    def download_key(self, obj):
+    @staticmethod
+    def download_key(obj):
         download_url = reverse_lazy("download-file", args=["private_key", obj.id])
         return format_html(
             '<a href="{}" class="button">Click to Download</a>', download_url
@@ -34,6 +36,7 @@ class PrivateKeyAdmin(admin.ModelAdmin):
 
 @admin.register(PublicCertificate)
 class PublicCertificateAdmin(admin.ModelAdmin):
+    """Admin class for the PublicCertificate model."""
     form = PublicCertificateForm
     list_display = ("name", "valid_from", "valid_to", "serial_number", "download_cert")
 
@@ -49,6 +52,7 @@ class PublicCertificateAdmin(admin.ModelAdmin):
 
 @admin.register(Partner)
 class PartnerAdmin(admin.ModelAdmin):
+    """Admin class for the Partner model."""
     form = PartnerForm
     list_display = [
         "name",
@@ -130,15 +134,14 @@ class PartnerAdmin(admin.ModelAdmin):
 
 @admin.register(Organization)
 class OrganizationAdmin(admin.ModelAdmin):
+    """Admin class for the Organization model."""
     list_display = ["name", "as2_name"]
     list_filter = ("name", "as2_name")
 
 
 @admin.register(Message)
 class MessageAdmin(admin.ModelAdmin):
-    def has_add_permission(self, request):
-        return False
-
+    """Admin class for the Message model."""
     search_fields = ("message_id", "payload")
 
     list_filter = ("direction", "status", "organization__as2_name", "partner__as2_name")
@@ -178,15 +181,19 @@ class MessageAdmin(admin.ModelAdmin):
     download_file.allow_tags = True
     download_file.short_description = "Payload"
 
-
-@admin.register(Mdn)
-class MdnAdmin(admin.ModelAdmin):
     def has_add_permission(self, request):
         return False
 
+
+@admin.register(Mdn)
+class MdnAdmin(admin.ModelAdmin):
+    """Admin class for the Mdn model."""
     search_fields = (
         "mdn_id",
         "message__message_id",
     )
     list_display = ("mdn_id", "message", "timestamp", "status")
     list_filter = ("status",)
+
+    def has_add_permission(self, request):
+        return False
