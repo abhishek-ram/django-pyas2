@@ -1,6 +1,15 @@
 Release History
 ===============
 
+1.2.2 - 2022-02-06
+------------------
+
+* Bump version of pyas2lib to 1.4.0 (PR #70 )
+* Use github actions for running test pipeline instead of travis
+* Add support for python 3.10 and upgrade pytest* packages
+* Deprecate support for python 3.6
+* Replace deprecated ugettext with gettext_lazy (PR #68 by @liquidxinc )
+
 1.2.1 - 2021-05-08
 ------------------
 
