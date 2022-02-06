@@ -17,10 +17,10 @@ tests_require = [
     "pytest==5.4.3",
     "pytest-cov==2.11.1",
     "pytest-django==3.9.0",
-    "pytest-mock==3.5.1"
-    "pylama==7.7.1"
-    "pylint==2.7.3"
-    "pytest-black==0.3.12"
+    "pytest-mock==3.5.1",
+    "pylama==7.7.1",
+    "pylint==2.7.3",
+    "pytest-black==0.3.12",
     "black==21.5b0",
     "django-environ==0.4.5",
 ]
