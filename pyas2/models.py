@@ -28,6 +28,7 @@ logger = logging.getLogger("pyas2")
 
 
 class PrivateKey(models.Model):
+    """Model for storing an Organizations Private Key."""
     name = models.CharField(max_length=255)
     key = models.BinaryField()
     key_pass = models.CharField(max_length=100, verbose_name="Private Key Password")
@@ -44,10 +45,11 @@ class PrivateKey(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
 
 class PublicCertificate(models.Model):
+    """Model for storing a Partners Public Certificate."""
     name = models.CharField(max_length=255)
     certificate = models.BinaryField()
     certificate_ca = models.BinaryField(
@@ -71,10 +73,11 @@ class PublicCertificate(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
 
 class Organization(models.Model):
+    """Model for storing an AS2 Organization."""
     name = models.CharField(verbose_name=_("Organization Name"), max_length=100)
     as2_name = models.CharField(
         verbose_name=_("AS2 Identifier"), max_length=100, primary_key=True
@@ -125,10 +128,11 @@ class Organization(models.Model):
         return As2Organization(**params)
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
 
 class Partner(models.Model):
+    """Model for storing an AS2 Partner."""
     CONTENT_TYPE_CHOICES = (
         ("application/EDI-X12", "application/EDI-X12"),
         ("application/EDIFACT", "application/EDIFACT"),
@@ -266,9 +270,9 @@ class Partner(models.Model):
         params = {
             "as2_name": self.as2_name,
             "compress": self.compress,
-            "sign": True if self.signature else False,
+            "sign": bool(self.signature),
             "digest_alg": self.signature,
-            "encrypt": True if self.encryption else False,
+            "encrypt": bool(self.encryption),
             "enc_alg": self.encryption,
             "mdn_mode": self.mdn_mode,
             "mdn_digest_alg": self.mdn_sign,
@@ -292,10 +296,11 @@ class Partner(models.Model):
         return As2Partner(**params)
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
 
 class MessageManager(models.Manager):
+    """Model manager for the AS2 Message model."""
     def create_from_as2message(
         self,
         as2message,
@@ -305,7 +310,7 @@ class MessageManager(models.Manager):
         filename=None,
         detailed_status=None,
     ):
-        """Create the Message from the pyas2lib's Message object"""
+        """Create the Message from the pyas2lib's Message object."""
 
         if direction == "IN":
             organization = as2message.receiver.as2_name if as2message.receiver else None
@@ -356,6 +361,7 @@ class MessageManager(models.Manager):
 
 
 def get_message_store(instance, filename):
+    """Return the path for storing the message payload."""
     current_date = timezone.now().strftime("%Y%m%d")
     if instance.direction == "OUT":
         target_dir = os.path.join(
@@ -369,6 +375,7 @@ def get_message_store(instance, filename):
 
 
 class Message(models.Model):
+    """Model for storing an AS2 Message between an Organization and a Partner."""
     DIRECTION_CHOICES = (
         ("IN", _("Inbound")),
         ("OUT", _("Outbound")),
