@@ -14,14 +14,15 @@ install_requires = [
 ]
 
 tests_require = [
-    "pytest==5.4.3",
-    "pytest-cov==2.11.1",
+    "pytest==6.2.5",
+    "pytest-cov==2.8.1",
+    "coverage==5.0.4",
     "pytest-django==3.9.0",
     "pytest-mock==3.5.1",
-    "pylama==7.7.1",
-    "pylint==2.7.3",
+    "pylama==8.3.7",
+    "pylint==2.12.1",
     "pytest-black==0.3.12",
-    "black==21.5b0",
+    "black==21.12b0",
     "django-environ==0.4.5",
 ]
 
