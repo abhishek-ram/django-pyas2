@@ -8,7 +8,7 @@ with open(os.path.join(root, 'README.rst')) as f:
     README = f.read()
 
 install_requires = [
-    'pyas2lib==1.3.3',
+    'pyas2lib==1.4.0',
     'django>=2.2.18',
     'requests'
 ]
@@ -24,7 +24,7 @@ tests_require = [
 
 setup(
     name='django-pyas2',
-    version='1.2.0',
+    version='1.2.1',
     description='AS2 file transfer Server built on Python and Django.',
     license="GNU GPL v3.0",
     long_description=README,
