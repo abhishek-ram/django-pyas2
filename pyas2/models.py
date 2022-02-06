@@ -29,6 +29,7 @@ logger = logging.getLogger("pyas2")
 
 class PrivateKey(models.Model):
     """Model for storing an Organizations Private Key."""
+
     name = models.CharField(max_length=255)
     key = models.BinaryField()
     key_pass = models.CharField(max_length=100, verbose_name="Private Key Password")
@@ -50,6 +51,7 @@ class PrivateKey(models.Model):
 
 class PublicCertificate(models.Model):
     """Model for storing a Partners Public Certificate."""
+
     name = models.CharField(max_length=255)
     certificate = models.BinaryField()
     certificate_ca = models.BinaryField(
@@ -78,6 +80,7 @@ class PublicCertificate(models.Model):
 
 class Organization(models.Model):
     """Model for storing an AS2 Organization."""
+
     name = models.CharField(verbose_name=_("Organization Name"), max_length=100)
     as2_name = models.CharField(
         verbose_name=_("AS2 Identifier"), max_length=100, primary_key=True
@@ -133,6 +136,7 @@ class Organization(models.Model):
 
 class Partner(models.Model):
     """Model for storing an AS2 Partner."""
+
     CONTENT_TYPE_CHOICES = (
         ("application/EDI-X12", "application/EDI-X12"),
         ("application/EDIFACT", "application/EDIFACT"),
@@ -300,7 +304,8 @@ class Partner(models.Model):
 
 
 class MessageManager(models.Manager):
-    """Model manager for the AS2 Message model."""
+    """Custom model manager for the AS2 Message model."""
+
     def create_from_as2message(
         self,
         as2message,
@@ -376,6 +381,7 @@ def get_message_store(instance, filename):
 
 class Message(models.Model):
     """Model for storing an AS2 Message between an Organization and a Partner."""
+
     DIRECTION_CHOICES = (
         ("IN", _("Inbound")),
         ("OUT", _("Outbound")),
@@ -417,6 +423,8 @@ class Message(models.Model):
     objects = MessageManager()
 
     class Meta:
+        """Define additional options for the Message model."""
+
         unique_together = ("message_id", "partner")
 
     @property
@@ -531,13 +539,15 @@ class Message(models.Model):
         self.save()
 
     def __str__(self):
-        return self.message_id
+        return str(self.message_id)
 
 
 class MdnManager(models.Manager):
+    """Custom model manager for the AS2 MDN model."""
+
     def create_from_as2mdn(self, as2mdn, message, status, return_url=None):
         """Create the MDN from the pyas2lib's MDN object"""
-        signed = True if as2mdn.digest_alg else False
+        signed = bool(as2mdn.digest_alg)
 
         # Check for message-id in MDN.
         if as2mdn.message_id is None:
@@ -567,6 +577,7 @@ class MdnManager(models.Manager):
 
 
 def get_mdn_store(instance, filename):
+    """Return the path for storing the MDN payload."""
     current_date = timezone.now().strftime("%Y%m%d")
     if instance.status == "S":
         target_dir = os.path.join("messages", "__store", "mdn", "sent", current_date)
@@ -579,6 +590,8 @@ def get_mdn_store(instance, filename):
 
 
 class Mdn(models.Model):
+    """Model for storing a MDN for an AS2 Message."""
+
     STATUS_CHOICES = (
         ("S", _("Sent")),
         ("R", _("Received")),
@@ -599,7 +612,7 @@ class Mdn(models.Model):
     objects = MdnManager()
 
     def __str__(self):
-        return self.mdn_id
+        return str(self.mdn_id)
 
     def send_async_mdn(self):
         """Send the asynchronous MDN to the partner"""
