@@ -11,6 +11,9 @@ django-pyAS2
 .. image:: https://travis-ci.org/abhishek-ram/django-pyas2.svg?branch=master
     :target: https://travis-ci.org/abhishek-ram/django-pyas2
 
+.. image:: https://github.com/abhishek-ram/django-pyas2/actions/workflows/run-tests.yml/badge.svg?branch=master&event=push
+    :target: https://github.com/abhishek-ram/django-pyas2/actions/workflows/run-tests.yml?query=branch%3Amaster++
+
 .. image:: https://codecov.io/gh/abhishek-ram/django-pyas2/branch/master/graph/badge.svg
   :target: https://codecov.io/gh/abhishek-ram/django-pyas2
 
