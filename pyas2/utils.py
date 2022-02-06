@@ -12,7 +12,7 @@ def run_post_send(message):
 
     command = message.partner.cmd_send
     if command:
-        logger.debug("Execute post successful send command %s" % command)
+        logger.debug(f"Execute post successful send command {command}")
         # Create command template and replace variables in the command
         command = Template(command)
         variables = {
@@ -33,7 +33,7 @@ def run_post_receive(message, full_filename):
 
     command = message.partner.cmd_receive
     if command:
-        logger.debug("Execute post successful receive command %s" % command)
+        logger.debug(f"Execute post successful receive command {command}")
 
         # Create command template and replace variables in the command
         command = Template(command)

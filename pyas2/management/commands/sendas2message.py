@@ -44,7 +44,9 @@ class Command(BaseCommand):
         try:
             partner = Partner.objects.get(as2_name=options["partner_as2name"])
         except Partner.DoesNotExist as e:
-            raise CommandError(f'Partner "{options["partner_as2name"]}" does not exist') from e
+            raise CommandError(
+                f'Partner "{options["partner_as2name"]}" does not exist'
+            ) from e
 
         # Check if file exists
         if not default_storage.exists(options["path_to_payload"]):

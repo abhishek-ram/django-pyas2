@@ -13,6 +13,7 @@ from pyas2.models import Message, Mdn
 
 class Command(BaseCommand):
     """Command to manage the django pyas2 server."""
+
     help = (
         "Command to manage the as2 server, includes options to cleanup, "
         "handle async mdns and message retries"
