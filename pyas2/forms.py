@@ -13,6 +13,7 @@ from pyas2.models import PublicCertificate
 
 class PartnerForm(forms.ModelForm):
     """Form for creating and editing AS2 partners."""
+
     def clean(self):
         cleaned_data = super().clean()
 
@@ -59,12 +60,14 @@ class PartnerForm(forms.ModelForm):
 
     class Meta:
         """Define additional config for the PartnerForm class."""
+
         model = Partner
         exclude = []
 
 
 class PrivateKeyForm(forms.ModelForm):
     """Form for creating and editing AS2 Organization private keys."""
+
     key_file = forms.FileField()
 
     def clean_key_file(self):
@@ -109,6 +112,7 @@ class PrivateKeyForm(forms.ModelForm):
 
     class Meta:
         """Define additional config for the PrivateKeyForm class."""
+
         model = PrivateKey
         fields = ["key_file", "key_pass"]
         widgets = {
@@ -118,6 +122,7 @@ class PrivateKeyForm(forms.ModelForm):
 
 class PublicCertificateForm(forms.ModelForm):
     """Form for creating and editing AS2 Partner public certs."""
+
     cert_file = forms.FileField(label="Certificate File")
     cert_ca_file = forms.FileField(label="Certificate CA File", required=False)
 
@@ -193,12 +198,15 @@ class PublicCertificateForm(forms.ModelForm):
         return instance
 
     class Meta:
+        """Define additional config for the PublicCertificateForm class."""
+
         model = PublicCertificate
         fields = ["cert_file", "cert_ca_file", "verify_cert"]
 
 
 class SendAs2MessageForm(forms.Form):
     """Form for sending AS2 messages to Partners from the Admin."""
+
     organization = forms.ModelChoiceField(
         queryset=Organization.objects.all(), empty_label=None
     )
