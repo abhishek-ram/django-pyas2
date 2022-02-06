@@ -129,8 +129,7 @@ class PartnerAdmin(admin.ModelAdmin):
     )
     actions = ["send_message"]
 
-    @staticmethod
-    def send_message(request, queryset):  # pylint: disable=W0613
+    def send_message(self, request, queryset):  # pylint: disable
         """Send the message to the first partner chosen by the user."""
         partner = queryset.first()
         return HttpResponseRedirect(
