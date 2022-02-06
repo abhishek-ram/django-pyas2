@@ -1,7 +1,8 @@
 import os
-import requests
-from email.parser import BytesHeaderParser
 from datetime import timedelta
+from email.parser import BytesHeaderParser
+
+import requests
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from pyas2lib import Message as AS2Message
