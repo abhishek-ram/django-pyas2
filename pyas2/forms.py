@@ -12,8 +12,10 @@ from pyas2.models import PublicCertificate
 
 
 class PartnerForm(forms.ModelForm):
+    """Form for creating and editing AS2 partners."""
+
     def clean(self):
-        cleaned_data = super(PartnerForm, self).clean()
+        cleaned_data = super().clean()
 
         # If http auth is set and credentials are missing raise error
         if cleaned_data.get("http_auth"):
@@ -57,14 +59,19 @@ class PartnerForm(forms.ModelForm):
         return cleaned_data
 
     class Meta:
+        """Define additional config for the PartnerForm class."""
+
         model = Partner
         exclude = []
 
 
 class PrivateKeyForm(forms.ModelForm):
+    """Form for creating and editing AS2 Organization private keys."""
+
     key_file = forms.FileField()
 
     def clean_key_file(self):
+        """Validate that uploaded private key has the right extension."""
         key_file = self.cleaned_data["key_file"]
 
         ext = os.path.splitext(key_file.name)[1]
@@ -78,7 +85,7 @@ class PrivateKeyForm(forms.ModelForm):
         return key_file
 
     def clean(self):
-        cleaned_data = super(PrivateKeyForm, self).clean()
+        cleaned_data = super().clean()
         key_file = cleaned_data.get("key_file")
 
         if key_file:
@@ -96,7 +103,7 @@ class PrivateKeyForm(forms.ModelForm):
         return cleaned_data
 
     def save(self, commit=True):
-        instance = super(PrivateKeyForm, self).save(commit=False)
+        instance = super().save(commit=False)
         instance.name = self.cleaned_data["key_filename"]
         instance.key = self.cleaned_data["key_file"]
         if commit:
@@ -104,6 +111,8 @@ class PrivateKeyForm(forms.ModelForm):
         return instance
 
     class Meta:
+        """Define additional config for the PrivateKeyForm class."""
+
         model = PrivateKey
         fields = ["key_file", "key_pass"]
         widgets = {
@@ -112,10 +121,13 @@ class PrivateKeyForm(forms.ModelForm):
 
 
 class PublicCertificateForm(forms.ModelForm):
+    """Form for creating and editing AS2 Partner public certs."""
+
     cert_file = forms.FileField(label="Certificate File")
     cert_ca_file = forms.FileField(label="Certificate CA File", required=False)
 
     def clean_cert_file(self):
+        """Validate that uploaded cert file has the right extension."""
         cert_file = self.cleaned_data["cert_file"]
 
         ext = os.path.splitext(cert_file.name)[1]
@@ -130,6 +142,7 @@ class PublicCertificateForm(forms.ModelForm):
         return cert_file
 
     def clean_cert_ca_file(self):
+        """Validate that uploaded cert ca file has the right extension."""
         cert_ca_file = self.cleaned_data["cert_ca_file"]
 
         if cert_ca_file:
@@ -148,7 +161,7 @@ class PublicCertificateForm(forms.ModelForm):
         return cert_ca_file
 
     def clean(self):
-        cleaned_data = super(PublicCertificateForm, self).clean()
+        cleaned_data = super().clean()
         cert_file = cleaned_data.get("cert_file")
         cert_ca_file = cleaned_data.get("cert_ca_file", "")
 
@@ -173,7 +186,7 @@ class PublicCertificateForm(forms.ModelForm):
         return cleaned_data
 
     def save(self, commit=True):
-        instance = super(PublicCertificateForm, self).save(commit=False)
+        instance = super().save(commit=False)
         instance.name = self.cleaned_data["cert_filename"]
         instance.certificate = self.cleaned_data["cert_file"]
 
@@ -185,11 +198,15 @@ class PublicCertificateForm(forms.ModelForm):
         return instance
 
     class Meta:
+        """Define additional config for the PublicCertificateForm class."""
+
         model = PublicCertificate
         fields = ["cert_file", "cert_ca_file", "verify_cert"]
 
 
 class SendAs2MessageForm(forms.Form):
+    """Form for sending AS2 messages to Partners from the Admin."""
+
     organization = forms.ModelChoiceField(
         queryset=Organization.objects.all(), empty_label=None
     )

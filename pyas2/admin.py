@@ -19,10 +19,14 @@ from pyas2.forms import PrivateKeyForm
 
 @admin.register(PrivateKey)
 class PrivateKeyAdmin(admin.ModelAdmin):
+    """Admin class for the PrivateKey model."""
+
     form = PrivateKeyForm
     list_display = ("name", "valid_from", "valid_to", "serial_number", "download_key")
 
-    def download_key(self, obj):
+    @staticmethod
+    def download_key(obj):
+        """Return the url to download the private key."""
         download_url = reverse_lazy("download-file", args=["private_key", obj.id])
         return format_html(
             '<a href="{}" class="button">Click to Download</a>', download_url
@@ -34,10 +38,14 @@ class PrivateKeyAdmin(admin.ModelAdmin):
 
 @admin.register(PublicCertificate)
 class PublicCertificateAdmin(admin.ModelAdmin):
+    """Admin class for the PublicCertificate model."""
+
     form = PublicCertificateForm
     list_display = ("name", "valid_from", "valid_to", "serial_number", "download_cert")
 
-    def download_cert(self, obj):
+    @staticmethod
+    def download_cert(obj):
+        """Return the url to download the public cert."""
         download_url = reverse_lazy("download-file", args=["public_cert", obj.id])
         return format_html(
             '<a href="{}" class="button">Click to Download</a>', download_url
@@ -49,6 +57,8 @@ class PublicCertificateAdmin(admin.ModelAdmin):
 
 @admin.register(Partner)
 class PartnerAdmin(admin.ModelAdmin):
+    """Admin class for the Partner model."""
+
     form = PartnerForm
     list_display = [
         "name",
@@ -119,7 +129,8 @@ class PartnerAdmin(admin.ModelAdmin):
     )
     actions = ["send_message"]
 
-    def send_message(self, request, queryset):
+    def send_message(self, request, queryset):  # pylint: disable=W0613,R0201
+        """Send the message to the first partner chosen by the user."""
         partner = queryset.first()
         return HttpResponseRedirect(
             reverse_lazy("as2-send") + "?partner_id=%s" % partner.as2_name
@@ -130,14 +141,15 @@ class PartnerAdmin(admin.ModelAdmin):
 
 @admin.register(Organization)
 class OrganizationAdmin(admin.ModelAdmin):
+    """Admin class for the Organization model."""
+
     list_display = ["name", "as2_name"]
     list_filter = ("name", "as2_name")
 
 
 @admin.register(Message)
 class MessageAdmin(admin.ModelAdmin):
-    def has_add_permission(self, request):
-        return False
+    """Admin class for the Message model."""
 
     search_fields = ("message_id", "payload")
 
@@ -157,32 +169,42 @@ class MessageAdmin(admin.ModelAdmin):
         "mdn_url",
     ]
 
-    def mdn_url(self, obj):
+    @staticmethod
+    def mdn_url(obj):
+        """Return the URL to the related MDN if present for the message."""
+        # pylint: disable=W0212
+
         if hasattr(obj, "mdn"):
             view_url = reverse_lazy(
                 f"admin:{Mdn._meta.app_label}_{Mdn._meta.model_name}_change",
                 args=[obj.mdn.id],
             )
             return format_html('<a href="{}" class="">{}</a>', view_url, obj.mdn.mdn_id)
+        return None
 
     mdn_url.allow_tags = True
     mdn_url.short_description = "MDN"
 
-    def download_file(self, obj):
+    @staticmethod
+    def download_file(obj):
+        """Return the URL to download the message payload."""
         if obj.payload:
             view_url = reverse_lazy("download-file", args=["message_payload", obj.id])
             return format_html(
                 '<a href="{}">{}</a>', view_url, os.path.basename(obj.payload.name)
             )
+        return None
 
     download_file.allow_tags = True
     download_file.short_description = "Payload"
 
+    def has_add_permission(self, request):
+        return False
+
 
 @admin.register(Mdn)
 class MdnAdmin(admin.ModelAdmin):
-    def has_add_permission(self, request):
-        return False
+    """Admin class for the Mdn model."""
 
     search_fields = (
         "mdn_id",
@@ -190,3 +212,6 @@ class MdnAdmin(admin.ModelAdmin):
     )
     list_display = ("mdn_id", "message", "timestamp", "status")
     list_filter = ("status",)
+
+    def has_add_permission(self, request):
+        return False

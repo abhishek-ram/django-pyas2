@@ -1,7 +1,8 @@
 import os
-import requests
-from email.parser import BytesHeaderParser
 from datetime import timedelta
+from email.parser import BytesHeaderParser
+
+import requests
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from pyas2lib import Message as AS2Message
@@ -11,6 +12,8 @@ from pyas2.models import Message, Mdn
 
 
 class Command(BaseCommand):
+    """Command to manage the django pyas2 server."""
+
     help = (
         "Command to manage the as2 server, includes options to cleanup, "
         "handle async mdns and message retries"
@@ -43,6 +46,7 @@ class Command(BaseCommand):
         )
 
     def retry(self, retry_msg):
+        """Retry sending the message to the partner."""
         # Increase the retry count
         if not retry_msg.retries:
             retry_msg.retries = 1
@@ -146,10 +150,10 @@ class Command(BaseCommand):
             for pending_msg in out_pending_msgs:
                 self.retry(pending_msg)
 
-            self.stdout.write(u"Successfully processed all pending mdns.")
+            self.stdout.write("Successfully processed all pending mdns.")
 
         if options["clean"]:
-            self.stdout.write(u"Cleanup maintenance process started")
+            self.stdout.write("Cleanup maintenance process started")
             max_archive_dt = timezone.now() - timedelta(settings.MAX_ARCH_DAYS)
             self.stdout.write(
                 "Delete all messages older than %s" % settings.MAX_ARCH_DAYS

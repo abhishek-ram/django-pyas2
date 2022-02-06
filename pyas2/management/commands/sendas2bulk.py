@@ -9,6 +9,8 @@ from pyas2.models import Partner
 
 
 class Command(BaseCommand):
+    """Command to send all pending messages."""
+
     help = "Command for sending all pending messages in the outbox folders"
 
     def handle(self, *args, **options):

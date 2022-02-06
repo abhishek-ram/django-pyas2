@@ -14,6 +14,8 @@ logger = logging.getLogger("pyas2")
 
 
 class Command(BaseCommand):
+    """Command to send an AS2 message."""
+
     help = "Send an as2 message to your trading partner"
     args = "<organization_as2name partner_as2name path_to_payload>"
 
@@ -35,14 +37,16 @@ class Command(BaseCommand):
         # Check if organization and partner exists
         try:
             org = Organization.objects.get(as2_name=options["org_as2name"])
-        except Organization.DoesNotExist:
+        except Organization.DoesNotExist as e:
             raise CommandError(
                 f'Organization "{options["org_as2name"]}" does not exist'
-            )
+            ) from e
         try:
             partner = Partner.objects.get(as2_name=options["partner_as2name"])
-        except Partner.DoesNotExist:
-            raise CommandError(f'Partner "{options["partner_as2name"]}" does not exist')
+        except Partner.DoesNotExist as e:
+            raise CommandError(
+                f'Partner "{options["partner_as2name"]}" does not exist'
+            ) from e
 
         # Check if file exists
         if not default_storage.exists(options["path_to_payload"]):
