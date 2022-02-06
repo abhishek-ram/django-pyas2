@@ -25,6 +25,7 @@ class PrivateKeyAdmin(admin.ModelAdmin):
 
     @staticmethod
     def download_key(obj):
+        """Return the url to download the private key."""
         download_url = reverse_lazy("download-file", args=["private_key", obj.id])
         return format_html(
             '<a href="{}" class="button">Click to Download</a>', download_url
@@ -40,7 +41,9 @@ class PublicCertificateAdmin(admin.ModelAdmin):
     form = PublicCertificateForm
     list_display = ("name", "valid_from", "valid_to", "serial_number", "download_cert")
 
-    def download_cert(self, obj):
+    @staticmethod
+    def download_cert(obj):
+        """Return the url to download the public cert."""
         download_url = reverse_lazy("download-file", args=["public_cert", obj.id])
         return format_html(
             '<a href="{}" class="button">Click to Download</a>', download_url
@@ -123,7 +126,9 @@ class PartnerAdmin(admin.ModelAdmin):
     )
     actions = ["send_message"]
 
-    def send_message(self, request, queryset):
+    @staticmethod
+    def send_message(request, queryset):
+        """Send the message to the first partner chosen by the user."""
         partner = queryset.first()
         return HttpResponseRedirect(
             reverse_lazy("as2-send") + "?partner_id=%s" % partner.as2_name
@@ -160,23 +165,29 @@ class MessageAdmin(admin.ModelAdmin):
         "mdn_url",
     ]
 
-    def mdn_url(self, obj):
+    @staticmethod
+    def mdn_url(obj):
+        """Return the URL to the related MDN if present for the message."""
         if hasattr(obj, "mdn"):
             view_url = reverse_lazy(
                 f"admin:{Mdn._meta.app_label}_{Mdn._meta.model_name}_change",
                 args=[obj.mdn.id],
             )
             return format_html('<a href="{}" class="">{}</a>', view_url, obj.mdn.mdn_id)
+        return None
 
     mdn_url.allow_tags = True
     mdn_url.short_description = "MDN"
 
-    def download_file(self, obj):
+    @staticmethod
+    def download_file(obj):
+        """Return the URL to download the message payload."""
         if obj.payload:
             view_url = reverse_lazy("download-file", args=["message_payload", obj.id])
             return format_html(
                 '<a href="{}">{}</a>', view_url, os.path.basename(obj.payload.name)
             )
+        return None
 
     download_file.allow_tags = True
     download_file.short_description = "Payload"
