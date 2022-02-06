@@ -188,7 +188,8 @@ class ReceiveAs2Message(View):
 
 class SendAs2Message(FormView):
     """View for sending AS2 messages to a partner."""
-    # pylint disable: W0212
+
+    # pylint: disable=W0212
     template_name = "pyas2/send_as2_message.html"
     form_class = SendAs2MessageForm
     success_url = reverse_lazy(
@@ -247,7 +248,7 @@ class SendAs2Message(FormView):
                 self.request,
                 "Message transmission failed, check Messages tab for details.",
             )
-        return super(SendAs2Message, self).form_valid(form)
+        return super().form_valid(form)
 
 
 class DownloadFile(View):
