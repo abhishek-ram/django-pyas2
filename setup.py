@@ -19,7 +19,7 @@ tests_require = [
     "coverage==5.0.4",
     "pytest-django==3.9.0",
     "pytest-mock==3.5.1",
-    "pylama==8.3.7",
+    "pylama==7.7.1",
     "pylint==2.12.1",
     "pytest-black==0.3.12",
     "black==21.12b0",
