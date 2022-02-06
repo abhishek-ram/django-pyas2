@@ -20,6 +20,7 @@ from pyas2.forms import PrivateKeyForm
 @admin.register(PrivateKey)
 class PrivateKeyAdmin(admin.ModelAdmin):
     """Admin class for the PrivateKey model."""
+
     form = PrivateKeyForm
     list_display = ("name", "valid_from", "valid_to", "serial_number", "download_key")
 
@@ -38,6 +39,7 @@ class PrivateKeyAdmin(admin.ModelAdmin):
 @admin.register(PublicCertificate)
 class PublicCertificateAdmin(admin.ModelAdmin):
     """Admin class for the PublicCertificate model."""
+
     form = PublicCertificateForm
     list_display = ("name", "valid_from", "valid_to", "serial_number", "download_cert")
 
@@ -56,6 +58,7 @@ class PublicCertificateAdmin(admin.ModelAdmin):
 @admin.register(Partner)
 class PartnerAdmin(admin.ModelAdmin):
     """Admin class for the Partner model."""
+
     form = PartnerForm
     list_display = [
         "name",
@@ -127,7 +130,7 @@ class PartnerAdmin(admin.ModelAdmin):
     actions = ["send_message"]
 
     @staticmethod
-    def send_message(request, queryset):
+    def send_message(request, queryset):  # pylint: disable=W0613
         """Send the message to the first partner chosen by the user."""
         partner = queryset.first()
         return HttpResponseRedirect(
@@ -140,6 +143,7 @@ class PartnerAdmin(admin.ModelAdmin):
 @admin.register(Organization)
 class OrganizationAdmin(admin.ModelAdmin):
     """Admin class for the Organization model."""
+
     list_display = ["name", "as2_name"]
     list_filter = ("name", "as2_name")
 
@@ -147,6 +151,7 @@ class OrganizationAdmin(admin.ModelAdmin):
 @admin.register(Message)
 class MessageAdmin(admin.ModelAdmin):
     """Admin class for the Message model."""
+
     search_fields = ("message_id", "payload")
 
     list_filter = ("direction", "status", "organization__as2_name", "partner__as2_name")
@@ -170,7 +175,7 @@ class MessageAdmin(admin.ModelAdmin):
         """Return the URL to the related MDN if present for the message."""
         if hasattr(obj, "mdn"):
             view_url = reverse_lazy(
-                f"admin:{Mdn._meta.app_label}_{Mdn._meta.model_name}_change",
+                f"admin:{Mdn._meta.app_label}_{Mdn._meta.model_name}_change",  # pylint: disable=W0212
                 args=[obj.mdn.id],
             )
             return format_html('<a href="{}" class="">{}</a>', view_url, obj.mdn.mdn_id)
@@ -199,6 +204,7 @@ class MessageAdmin(admin.ModelAdmin):
 @admin.register(Mdn)
 class MdnAdmin(admin.ModelAdmin):
     """Admin class for the Mdn model."""
+
     search_fields = (
         "mdn_id",
         "message__message_id",
