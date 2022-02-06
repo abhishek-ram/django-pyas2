@@ -129,7 +129,7 @@ class PartnerAdmin(admin.ModelAdmin):
     )
     actions = ["send_message"]
 
-    def send_message(self, request, queryset):  # pylint: disable
+    def send_message(self, request, queryset):  # pylint: disable=W0613,R0201
         """Send the message to the first partner chosen by the user."""
         partner = queryset.first()
         return HttpResponseRedirect(
@@ -172,9 +172,11 @@ class MessageAdmin(admin.ModelAdmin):
     @staticmethod
     def mdn_url(obj):
         """Return the URL to the related MDN if present for the message."""
+        # pylint: disable=W0212
+
         if hasattr(obj, "mdn"):
             view_url = reverse_lazy(
-                f"admin:{Mdn._meta.app_label}_{Mdn._meta.model_name}_change",  # pylint: disable=W0212
+                f"admin:{Mdn._meta.app_label}_{Mdn._meta.model_name}_change",
                 args=[obj.mdn.id],
             )
             return format_html('<a href="{}" class="">{}</a>', view_url, obj.mdn.mdn_id)
