@@ -22,7 +22,7 @@ tests_require = [
     "pylama==8.3.7",
     "pylint==2.12.1",
     "pytest-black==0.3.12",
-    "black==21.12b0",
+    "black==22.6.0",
     "django-environ==0.4.5",
 ]
 
