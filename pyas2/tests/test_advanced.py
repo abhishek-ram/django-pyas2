@@ -213,6 +213,37 @@ class AdvancedTestCases(TestCase):
         self.assertTrue(os.path.exists(touch_file))
         os.remove(touch_file)
 
+    def test_use_received_sender_and_receiver(self):
+        """Test using the sender and receiver as2 name while the payload received."""
+
+        # add the post receive command and save it
+        self.partner.cmd_receive = "touch %s/$sender.to.$receiver" % TEST_DIR
+        self.partner.keep_filename = True
+        self.partner.save()
+
+        # Create the client partner and send the command
+        partner = Partner.objects.create(
+            name="AS2 Server",
+            as2_name="as2server",
+            target_url="http://localhost:8080/pyas2/as2receive",
+            signature="sha1",
+            signature_cert=self.server_crt,
+            encryption="tripledes_192_cbc",
+            encryption_cert=self.server_crt,
+            mdn=True,
+            mdn_mode="SYNC",
+            mdn_sign="sha1",
+        )
+        in_message = self.build_and_send(partner)
+        self.assertEqual(in_message.status, "S")
+
+        # Check that the command got executed
+        touch_file = os.path.join(
+            TEST_DIR, "%s.to.%s" % (self.organization.as2_name, partner.as2_name)
+        )
+        self.assertTrue(os.path.exists(touch_file))
+        os.remove(touch_file)
+
     @mock.patch("requests.post")
     def test_duplicate_error(self, mock_request):
         partner = Partner.objects.create(
