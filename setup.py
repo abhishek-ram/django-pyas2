@@ -24,6 +24,7 @@ tests_require = [
     "pytest-black==0.3.12",
     "black==22.6.0",
     "django-environ==0.4.5",
+    "pyflakes==2.4.0",
 ]
 
 
