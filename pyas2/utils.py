@@ -40,8 +40,8 @@ def run_post_receive(message, full_filename):
         variables = {
             "filename": os.path.basename(full_filename),
             "fullfilename": full_filename,
-            "sender": message.organization.as2_name,
-            "receiver": message.partner.as2_name,
+            "sender": message.partner.as2_name,
+            "receiver": message.organization.as2_name,
             "messageid": message.message_id,
         }
         variables.update(message.as2message.headers)
