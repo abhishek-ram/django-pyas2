@@ -409,7 +409,7 @@ class Message(models.Model):
     partner = models.ForeignKey(Partner, null=True, on_delete=models.SET_NULL)
 
     headers = models.FileField(upload_to=get_message_store, null=True, blank=True)
-    payload = models.FileField(upload_to=get_message_store, null=True, blank=True)
+    payload = models.FileField(upload_to=get_message_store, null=True, blank=True, max_length=4096)
 
     compressed = models.BooleanField(default=False)
     encrypted = models.BooleanField(default=False)
@@ -607,7 +607,7 @@ class Mdn(models.Model):
     return_url = models.URLField(null=True)
 
     headers = models.FileField(upload_to=get_mdn_store, null=True, blank=True)
-    payload = models.FileField(upload_to=get_mdn_store, null=True, blank=True)
+    payload = models.FileField(upload_to=get_mdn_store, null=True, blank=True, max_length=4096)
 
     objects = MdnManager()
 
