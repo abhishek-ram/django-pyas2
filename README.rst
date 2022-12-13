@@ -110,5 +110,5 @@ GNU GENERAL PUBLIC LICENSE
 .. _`RFC 4130`: https://www.ietf.org/rfc/rfc4130.txt
 .. _`documentation`: http://django-pyas2.readthedocs.org
 .. _`the repository`: http://github.com/abhishek-ram/django-pyas2
-.. _AUTHORS: https://github.com/abhishek-ram/django-pyas2/blob/master/AUTHORS.rst
+.. _AUTHORS: https://github.com/abhishek-ram/django-pyas2/blob/master/AUTHORS.md
 .. _`issue tracker`: https://github.com/abhishek-ram/django-pyas2/issues
