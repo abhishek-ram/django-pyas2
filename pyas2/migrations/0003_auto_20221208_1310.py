@@ -7,18 +7,28 @@ import pyas2.models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('pyas2', '0002_auto_20190603_1329'),
+        ("pyas2", "0002_auto_20190603_1329"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='mdn',
-            name='payload',
-            field=models.FileField(blank=True, max_length=4096, null=True, upload_to=pyas2.models.get_mdn_store),
+            model_name="mdn",
+            name="payload",
+            field=models.FileField(
+                blank=True,
+                max_length=4096,
+                null=True,
+                upload_to=pyas2.models.get_mdn_store,
+            ),
         ),
         migrations.AlterField(
-            model_name='message',
-            name='payload',
-            field=models.FileField(blank=True, max_length=4096, null=True, upload_to=pyas2.models.get_message_store),
+            model_name="message",
+            name="payload",
+            field=models.FileField(
+                blank=True,
+                max_length=4096,
+                null=True,
+                upload_to=pyas2.models.get_message_store,
+            ),
         ),
     ]
