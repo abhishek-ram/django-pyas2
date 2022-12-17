@@ -11,7 +11,7 @@ Create a new ``django`` project
 
 .. code-block:: console
 
-    $ django-admin.py startproject django_pyas2 .
+    $ django-admin startproject django_pyas2 .
 
 Add ``pyas2`` to your ``INSTALLED_APPS`` setting.
 
