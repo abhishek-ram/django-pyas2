@@ -1,6 +1,15 @@
 Release History
 ===============
 
+1.2.3 - 2023-02-25
+------------------
+
+* Bump version of pyas2lib to 1.4.3
+* Update variables in run_post_receive to fit the meaning (#82 by @timfanda35)
+* Fix link to AUTHORS since now it's a Markdown file (#85 by @adiroiban)
+* Update the lengths of the payload fields to allow longer file names (#87 by @pouldenton)
+* Update documentation to use django-admin instead of django-admin.py (#89 by @bkc)
+
 1.2.2 - 2022-02-06
 ------------------
 
