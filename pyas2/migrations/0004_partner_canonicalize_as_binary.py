@@ -6,13 +6,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('pyas2', '0003_auto_20221208_1310'),
+        ("pyas2", "0003_auto_20221208_1310"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='partner',
-            name='canonicalize_as_binary',
-            field=models.BooleanField(default=False, verbose_name='Force binary canonicalization'),
+            model_name="partner",
+            name="canonicalize_as_binary",
+            field=models.BooleanField(
+                default=False, verbose_name="Force binary canonicalization"
+            ),
         ),
     ]
