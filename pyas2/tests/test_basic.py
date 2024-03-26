@@ -629,7 +629,7 @@ class BasicServerClientTestCase(TestCase):
 
     @staticmethod
     def mock_message_content(message):
-        """"""
+        """Prevent binary content line feeds of being altered when sending."""
         message_bytes = message.payload.as_bytes()
         boundary = b"--" + message.payload.get_boundary().encode("utf-8")
         temp = message_bytes.split(boundary)
@@ -639,7 +639,6 @@ class BasicServerClientTestCase(TestCase):
     @staticmethod
     def mock_canonicalize_function(email_msg, canonicalize_as_binary=False):
         """Explicitly ignore the canonicalize_as_binary argument and force it to True."""
-        print("I was here")
         return canonicalize(email_msg, canonicalize_as_binary=True)
 
 
