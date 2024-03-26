@@ -229,6 +229,10 @@ class Partner(models.Model):
         blank=True,
     )
 
+    canonicalize_as_binary = models.BooleanField(
+        verbose_name=_("Force binary canonicalization"), default=False
+    )
+
     confirmation_message = models.TextField(
         verbose_name=_("Confirmation Message"),
         null=True,
@@ -280,6 +284,7 @@ class Partner(models.Model):
             "enc_alg": self.encryption,
             "mdn_mode": self.mdn_mode,
             "mdn_digest_alg": self.mdn_sign,
+            "canonicalize_as_binary": bool(self.canonicalize_as_binary),
         }
 
         if self.signature_cert:

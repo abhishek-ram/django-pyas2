@@ -70,6 +70,7 @@ class PartnerAdmin(admin.ModelAdmin):
         "signature_cert",
         "mdn",
         "mdn_mode",
+        "canonicalize_as_binary",
     ]
     list_filter = ("name", "as2_name")
     fieldsets = (
@@ -123,7 +124,12 @@ class PartnerAdmin(admin.ModelAdmin):
             "Advanced Settings",
             {
                 "classes": ("collapse", "wide"),
-                "fields": ("keep_filename", "cmd_send", "cmd_receive"),
+                "fields": (
+                    "canonicalize_as_binary",
+                    "keep_filename",
+                    "cmd_send",
+                    "cmd_receive",
+                ),
             },
         ),
     )

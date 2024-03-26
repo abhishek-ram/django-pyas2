@@ -2,21 +2,21 @@ import os
 from email.parser import HeaderParser
 from unittest import mock
 
-from django.test import TestCase, Client
+from django.test import Client, TestCase
+from pyas2lib.as2 import Message as As2Message
+from pyas2lib.utils import canonicalize
 from requests import Response
 from requests.exceptions import RequestException
 
 from pyas2.models import (
-    PrivateKey,
-    PublicCertificate,
+    Mdn,
+    Message,
     Organization,
     Partner,
-    Message,
-    Mdn,
+    PrivateKey,
+    PublicCertificate,
 )
 from pyas2.tests import TEST_DIR
-
-from pyas2lib.as2 import Message as As2Message
 
 
 class BasicServerClientTestCase(TestCase):
@@ -535,6 +535,68 @@ class BasicServerClientTestCase(TestCase):
         out_message.mdn.send_async_mdn()
 
     @mock.patch("requests.post")
+    def testForceBinaryCanonicalization(self, mock_request):
+        """Test Permutation 15: Sender sends text data using binary canonicalization
+        and requests a synchronous receipt."""
+
+        partner = Partner.objects.create(
+            name="AS2 Server",
+            as2_name="as2server",
+            target_url="http://localhost:8080/pyas2/as2receive",
+            signature="sha1",
+            signature_cert=self.server_crt,
+            encryption=None,
+            encryption_cert=None,
+            mdn=True,
+            mdn_mode="SYNC",
+        )
+
+        receiver = Partner.objects.get(as2_name="as2client")
+        receiver.canonicalize_as_binary = True
+        receiver.save()
+
+        as2message = As2Message(
+            sender=self.organization.as2org, receiver=partner.as2partner
+        )
+
+        with mock.patch("pyas2lib.as2.canonicalize") as mock_canonicalize:
+            mock_canonicalize.side_effect = self.mock_canonicalize_function
+
+            as2message.build(
+                self.payload,
+                filename="testmessage.edi",
+                subject=partner.subject,
+                content_type=partner.content_type,
+            )
+
+            in_message, _ = Message.objects.create_from_as2message(
+                as2message=as2message, payload=self.payload, direction="OUT", status="P"
+            )
+
+        mock_request.side_effect = SendMessageMock(self.client)
+        in_message.send_message(
+            as2message.headers, self.mock_message_content(as2message)
+        )
+
+        # Check if message was processed successfully
+        out_message = Message.objects.get(
+            message_id=in_message.message_id, direction="IN"
+        )
+
+        receiver.canonicalize_as_binary = False
+        receiver.save()
+
+        self.assertEqual(out_message.status, "S")
+        self.assertTrue(out_message.signed)
+        self.assertEqual(in_message.status, "S")
+        self.assertIsNotNone(in_message.mdn)
+
+        # Check if input and output files are the same
+        self.assertTrue(
+            self.compareFiles(in_message.payload.name, out_message.payload.name)
+        )
+
+    @mock.patch("requests.post")
     def build_and_send(self, partner, mock_request):
         # Build and send the message to server
         as2message = As2Message(
@@ -564,6 +626,20 @@ class BasicServerClientTestCase(TestCase):
                 return all(
                     lineA == lineB for lineA, lineB in zip(a.readlines(), b.readlines())
                 )
+
+    @staticmethod
+    def mock_message_content(message):
+        """Prevent binary content line feeds of being altered when sending."""
+        message_bytes = message.payload.as_bytes()
+        boundary = b"--" + message.payload.get_boundary().encode("utf-8")
+        temp = message_bytes.split(boundary)
+        temp.pop(0)
+        return boundary + boundary.join(temp)
+
+    @staticmethod
+    def mock_canonicalize_function(email_msg, canonicalize_as_binary=False):
+        """Explicitly ignore the canonicalize_as_binary argument and force it to True."""
+        return canonicalize(email_msg, canonicalize_as_binary=True)
 
 
 class SendMessageMock(object):
