@@ -1,5 +1,6 @@
 import os
 
+import django
 from django.conf import settings
 
 APP_SETTINGS = getattr(settings, "PYAS2", {})
@@ -20,3 +21,11 @@ ASYNC_MDN_WAIT = APP_SETTINGS.get("ASYNC_MDN_WAIT", 30)
 
 # Max number of days worth of messages to be saved in archive
 MAX_ARCH_DAYS = APP_SETTINGS.get("MAX_ARCH_DAYS", 30)
+
+if django.VERSION >= (4, 2) and "as2files" not in settings.STORAGES:
+    settings.STORAGES["as2files"] = {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+        "OPTIONS": {
+            "location": DATA_DIR,
+        },
+    }

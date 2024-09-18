@@ -6,23 +6,36 @@ import traceback
 from email.parser import HeaderParser
 from uuid import uuid4
 
+import django
 import requests
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext as _
-
-from pyas2lib import (
-    Mdn as As2Mdn,
-    Message as As2Message,
-    Organization as As2Organization,
-    Partner as As2Partner,
-)
+from pyas2lib import Mdn as As2Mdn
+from pyas2lib import Message as As2Message
+from pyas2lib import Organization as As2Organization
+from pyas2lib import Partner as As2Partner
 from pyas2lib.utils import extract_certificate_info
 
 from pyas2 import settings
 from pyas2.utils import run_post_send
+
+# Check if running Django >= 4.2
+if django.VERSION >= (4, 2):
+    try:
+        from django.core.files.storage import storages  # noqa: E0611
+
+        as2files_storage = storages[
+            "as2files"
+        ]  # Use 'as2files' storage if defined in Django 4.2+
+    except KeyError:
+        # If 'as2files' is not configured, fallback to default storage
+        as2files_storage = default_storage
+else:
+    # In Django 4.1 or lower, fallback to default storage
+    as2files_storage = default_storage
 
 logger = logging.getLogger("pyas2")
 
@@ -349,18 +362,14 @@ class MessageManager(models.Manager):
         # Save the payload to the inbox folder
         full_filename = None
         if direction == "IN" and status == "S":
-            if settings.DATA_DIR:
-                dirname = os.path.join(
-                    settings.DATA_DIR, "messages", organization, "inbox", partner
-                )
-            else:
-                dirname = os.path.join("messages", organization, "inbox", partner)
+            dirname = os.path.join("messages", organization, "inbox", partner)
             if not message.partner.keep_filename or not filename:
                 filename = f"{message.message_id}.msg"
-            full_filename = default_storage.generate_filename(
+
+            full_filename = as2files_storage.generate_filename(
                 posixpath.join(dirname, filename)
             )
-            default_storage.save(name=full_filename, content=ContentFile(payload))
+            as2files_storage.save(name=full_filename, content=ContentFile(payload))
 
         return message, full_filename
 
