@@ -7,11 +7,13 @@ import pytest
 from django.conf import settings
 from django.core import management
 from django.core.files.base import ContentFile
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 
 from pyas2 import settings as app_settings
-from pyas2.models import As2Message, Message, Mdn
-from pyas2.tests import TEST_DIR
 from pyas2.management.commands.sendas2bulk import Command as SendBulkCommand
+from pyas2.models import As2Message, Mdn, Message
+from pyas2.tests import TEST_DIR
 
 
 @pytest.mark.django_db
@@ -78,14 +80,23 @@ def test_sendmessage_command(mocker, organization, partner):
     mocked_delete = mocker.patch(
         "pyas2.management.commands.sendas2message.default_storage.delete"
     )
-    management.call_command(
-        "sendas2message",
-        organization.as2_name,
-        partner.as2_name,
-        test_message,
-        delete=True,
-    )
+
+    with CaptureQueriesContext(connection) as queries:
+
+        management.call_command(
+            "sendas2message",
+            organization.as2_name,
+            partner.as2_name,
+            test_message,
+            delete=True,
+        )
+
+        filtered_queries = [
+            query for query in queries if "SAVEPOINT" not in query["sql"]
+        ]
+
     assert mocked_delete.call_count == 1
+    assert len(filtered_queries) == 6
 
 
 @pytest.mark.django_db

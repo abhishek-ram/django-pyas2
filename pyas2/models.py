@@ -342,9 +342,12 @@ class MessageManager(models.Manager):
         if not filename:
             filename = f"{uuid4()}.msg"
         message.headers.save(
-            name=f"{filename}.header", content=ContentFile(as2message.headers_str)
+            name=f"{filename}.header",
+            content=ContentFile(as2message.headers_str),
+            save=False,
         )
-        message.payload.save(name=filename, content=ContentFile(payload))
+        message.payload.save(name=filename, content=ContentFile(payload), save=False)
+        message.save()
 
         # Save the payload to the inbox folder
         full_filename = None
@@ -460,6 +463,13 @@ class Message(models.Model):
 
     def send_message(self, header, payload):
         """Send the message to the partner"""
+
+        if self.organization_id and self.partner_id:
+            self.organization = self.organization or Organization.objects.get(
+                id=self.organization_id
+            )
+            self.partner = self.partner or Partner.objects.get(id=self.partner_id)
+
         logger.info(
             f'Sending message {self.message_id} from organization "{self.organization}" '
             f'to partner "{self.partner}".'

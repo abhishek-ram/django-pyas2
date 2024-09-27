@@ -56,7 +56,11 @@ class ReceiveAs2Message(View):
     @staticmethod
     def find_organization(org_id):
         """Find the org using the As2 Id and return its pyas2 type"""
-        org = Organization.objects.filter(as2_name=org_id).first()
+        org = (
+            Organization.objects.select_related("encryption_key", "signature_key")
+            .filter(as2_name=org_id)
+            .first()
+        )
         if org:
             return org.as2org
         return None
@@ -64,7 +68,11 @@ class ReceiveAs2Message(View):
     @staticmethod
     def find_partner(partner_id):
         """Find the partner using the As2 Id and return its pyas2 type"""
-        partner = Partner.objects.filter(as2_name=partner_id).first()
+        partner = (
+            Partner.objects.select_related("encryption_cert", "signature_cert")
+            .filter(as2_name=partner_id)
+            .first()
+        )
         if partner:
             return partner.as2partner
         return None
@@ -97,7 +105,7 @@ class ReceiveAs2Message(View):
         status, detailed_status = as2mdn.parse(request_body, self.find_message)
 
         if not detailed_status == "mdn-not-found":
-            message = Message.objects.get(
+            message = Message.objects.select_related("organization", "partner").get(
                 message_id=as2mdn.orig_message_id, direction="OUT"
             )
             logger.info(

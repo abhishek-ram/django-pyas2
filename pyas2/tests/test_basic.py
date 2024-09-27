@@ -2,21 +2,22 @@ import os
 from email.parser import HeaderParser
 from unittest import mock
 
-from django.test import TestCase, Client
+from django.db import connection
+from django.test import Client, TestCase
+from django.test.utils import CaptureQueriesContext
+from pyas2lib.as2 import Message as As2Message
 from requests import Response
 from requests.exceptions import RequestException
 
 from pyas2.models import (
-    PrivateKey,
-    PublicCertificate,
+    Mdn,
+    Message,
     Organization,
     Partner,
-    Message,
-    Mdn,
+    PrivateKey,
+    PublicCertificate,
 )
 from pyas2.tests import TEST_DIR
-
-from pyas2lib.as2 import Message as As2Message
 
 
 class BasicServerClientTestCase(TestCase):
@@ -533,6 +534,29 @@ class BasicServerClientTestCase(TestCase):
         # Check async mdn failure
         mock_request.side_effect = RequestException()
         out_message.mdn.send_async_mdn()
+
+    def testNumberOfQueries(self):
+        """Testing against the number of queries executed"""
+
+        # Create the partner with appropriate settings for this case
+
+        partner = Partner.objects.create(
+            name="AS2 Server",
+            as2_name="as2server",
+            target_url="http://localhost:8080/pyas2/as2receive",
+            mdn=False,
+        )
+
+        with CaptureQueriesContext(connection) as queries:
+            in_message = self.build_and_send(partner)
+
+            # Remove the transaction related queries
+            filtered_queries = [
+                query for query in queries if "SAVEPOINT" not in query["sql"]
+            ]
+
+            # Number of queries should be 13
+            self.assertEqual(len(filtered_queries), 13)
 
     @mock.patch("requests.post")
     def build_and_send(self, partner, mock_request):

@@ -66,6 +66,7 @@ class Command(BaseCommand):
                 content_type=partner.content_type,
                 disposition_notification_to=org.email_address or "no-reply@pyas2.com",
             )
+
         message, _ = Message.objects.create_from_as2message(
             as2message=as2message,
             payload=payload,
@@ -73,6 +74,9 @@ class Command(BaseCommand):
             direction="OUT",
             status="P",
         )
+
+        message.organization = org
+        message.partner = partner
         message.send_message(as2message.headers, as2message.content)
 
         # Delete original file if option is set
