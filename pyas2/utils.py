@@ -1,9 +1,26 @@
 # -*- coding: utf-8 -*-
 import logging
 import os
+import shlex
+import subprocess
 from string import Template
 
 logger = logging.getLogger("pyas2")
+
+
+def _run_command(template_str, variables):
+    """Tokenize the admin's command template and execute it without a shell.
+
+    The template is parsed once via shlex.split, then each token is run through
+    Template.safe_substitute. This means substituted values land inside a single
+    argv entry and cannot be parsed as shell syntax — protecting against injection
+    from partner-supplied AS2 values (message ID, headers, filename).
+    """
+    tokens = shlex.split(template_str)
+    args = [Template(tok).safe_substitute(variables) for tok in tokens]
+    if not args:
+        return
+    subprocess.run(args, shell=False, check=False)
 
 
 def run_post_send(message):
@@ -13,8 +30,6 @@ def run_post_send(message):
     command = message.partner.cmd_send
     if command:
         logger.debug(f"Execute post successful send command {command}")
-        # Create command template and replace variables in the command
-        command = Template(command)
         variables = {
             "filename": os.path.basename(message.payload.name),
             "sender": message.organization.as2_name,
@@ -22,9 +37,7 @@ def run_post_send(message):
             "messageid": message.message_id,
         }
         variables.update(message.as2message.headers)
-
-        # Execute the command
-        os.system(command.safe_substitute(variables))
+        _run_command(command, variables)
 
 
 def run_post_receive(message, full_filename):
@@ -34,9 +47,6 @@ def run_post_receive(message, full_filename):
     command = message.partner.cmd_receive
     if command:
         logger.debug(f"Execute post successful receive command {command}")
-
-        # Create command template and replace variables in the command
-        command = Template(command)
         variables = {
             "filename": os.path.basename(full_filename),
             "fullfilename": full_filename,
@@ -45,6 +55,4 @@ def run_post_receive(message, full_filename):
             "messageid": message.message_id,
         }
         variables.update(message.as2message.headers)
-
-        # Execute the command
-        os.system(command.safe_substitute(variables))
+        _run_command(command, variables)

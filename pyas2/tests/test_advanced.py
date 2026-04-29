@@ -244,6 +244,34 @@ class AdvancedTestCases(TestCase):
         self.assertTrue(os.path.exists(touch_file))
         os.remove(touch_file)
 
+    def test_post_receive_command_blocks_shell_injection(self):
+        """Partner-supplied values must not be parsed as shell syntax."""
+        from pyas2.utils import run_post_receive
+
+        canary = os.path.join(TEST_DIR, "pyas2_injection_canary")
+        if os.path.exists(canary):
+            os.remove(canary)
+
+        fake_message = mock.MagicMock()
+        fake_message.partner.cmd_receive = "touch %s/$messageid" % TEST_DIR
+        fake_message.partner.as2_name = "as2client"
+        fake_message.organization.as2_name = "as2server"
+        fake_message.message_id = "legit; touch %s" % canary
+        fake_message.as2message.headers = {}
+
+        run_post_receive(fake_message, full_filename="/tmp/test.edi")
+
+        self.assertFalse(
+            os.path.exists(canary),
+            "Shell injection via $messageid was executed",
+        )
+
+        legitimate = os.path.join(
+            TEST_DIR, "legit; touch %s" % canary
+        )
+        if os.path.exists(legitimate):
+            os.remove(legitimate)
+
     @mock.patch("requests.post")
     def test_duplicate_error(self, mock_request):
         partner = Partner.objects.create(
