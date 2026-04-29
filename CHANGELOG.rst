@@ -1,6 +1,18 @@
 Release History
 ===============
 
+1.2.4
+-----
+
+* Replace ``os.system()`` with ``subprocess.run(shell=False)`` in
+  ``run_post_send`` and ``run_post_receive`` to harden against shell-metacharacter
+  injection from partner-supplied AS2 message values (message ID, AS2 headers,
+  filename). **Breaking:** shell-only features in ``cmd_send`` / ``cmd_receive``
+  templates (pipes, redirection, ``&&`` / ``;`` chaining, env-var or tilde
+  expansion, glob, command substitution) are no longer interpreted. Templates
+  must be a single command followed by arguments. If shell features are needed,
+  invoke a wrapper script from the template.
+
 1.2.3 - 2023-02-25
 ------------------
 
