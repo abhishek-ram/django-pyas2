@@ -75,6 +75,29 @@ Field Name                                          Description                 
                             verification.
 ==========================  ==========================================  =========
 
+.. _certificate-rollover:
+
+Certificate Rollover
+--------------------
+Certificates expire and have to be renewed, which usually means that you and your partner
+need to switch to the new certificate at exactly the same moment to avoid a period during
+which no messages can be exchanged. To avoid such an outage, multiple certificates can be
+assigned to a partner using the ``Encryption Certificate Rollover List`` and the
+``Signature Certificate Rollover List`` fields of the partner.
+
+Once both the expiring and the renewed certificate are in the rollover list of the
+partner, no further action is needed at the time of the switch:
+
+* Outbound messages are encrypted using the certificate that is valid at the time of
+  transmission. Of several valid certificates the most recently issued one is used, and
+  when none of them is valid the one expiring last is used.
+* Inbound messages and MDNs are verified against the certificate that is currently in
+  use, and when that fails, against each of the other certificates in the list. So a
+  partner that keeps signing with the old certificate for a while is still accepted.
+
+The certificate currently used for a partner is shown in the ``Encryption Certificate``
+and ``Signature Certificate`` columns of the partner list in the Django Admin.
+
 .. rubric:: Footnotes
 
 .. [#f1] ``django-pyas2`` supports only PEM/DER encoded certificates.

@@ -1,6 +1,12 @@
 Release History
 ===============
 
+Unreleased
+----------
+
+* Add certificate rollover lists to partners so that multiple certificates can be
+  assigned to a partner and the valid one is used based on its validity dates (#123)
+
 1.2.3 - 2023-02-25
 ------------------
 

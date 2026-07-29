@@ -34,14 +34,22 @@ class PartnerForm(forms.ModelForm):
                     )
                 )
 
+        # certificates can be set either directly or in the rollover list
+        has_encryption_cert = cleaned_data.get("encryption_cert") or cleaned_data.get(
+            "encryption_cert_rollover"
+        )
+        has_signature_cert = cleaned_data.get("signature_cert") or cleaned_data.get(
+            "signature_cert_rollover"
+        )
+
         # if encryption is set and no cert is mentioned set error
-        if cleaned_data.get("encryption") and not cleaned_data.get("encryption_cert"):
+        if cleaned_data.get("encryption") and not has_encryption_cert:
             raise forms.ValidationError(
                 _("Encryption Key is mandatory when message encryption is set")
             )
 
         # if signature is set and no cert is mentioned set error
-        if cleaned_data.get("signature") and not cleaned_data.get("signature_cert"):
+        if cleaned_data.get("signature") and not has_signature_cert:
             raise forms.ValidationError(
                 _("Signature Key is required when message signature is set")
             )
@@ -51,7 +59,7 @@ class PartnerForm(forms.ModelForm):
             raise forms.ValidationError(_("MDN Mode needs to be specified"))
 
         # if the mdn signature is set then the signature cert must be set
-        if cleaned_data.get("mdn_sign") and not cleaned_data.get("signature_cert"):
+        if cleaned_data.get("mdn_sign") and not has_signature_cert:
             raise forms.ValidationError(
                 _("Signature Key is mandatory when signed mdn is requested")
             )
