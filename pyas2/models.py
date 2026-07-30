@@ -49,6 +49,40 @@ class PrivateKey(models.Model):
         return str(self.name)
 
 
+def order_certificates(certificates, at_time=None):
+    """Order certificates by how likely they are to be the one currently in use.
+
+    Certificates that are within their validity period at ``at_time`` come first,
+    the most recently issued one leading. Certificates that are expired or not
+    yet valid follow, the one expiring last leading, so that a partner is still
+    reachable when none of its certificates are valid.
+    """
+    at_time = at_time or timezone.now()
+
+    unique = []
+    for certificate in certificates:
+        if certificate is not None and certificate not in unique:
+            unique.append(certificate)
+
+    valid = [cert for cert in unique if cert.is_valid(at_time)]
+    invalid = [cert for cert in unique if not cert.is_valid(at_time)]
+
+    valid.sort(
+        key=lambda cert: (cert.valid_from is not None, cert.valid_from), reverse=True
+    )
+    invalid.sort(
+        key=lambda cert: (cert.valid_to is not None, cert.valid_to), reverse=True
+    )
+
+    return valid + invalid
+
+
+def select_certificate(certificates, at_time=None):
+    """Return the certificate to be used at ``at_time`` or None if there is none."""
+    ordered = order_certificates(certificates, at_time=at_time)
+    return ordered[0] if ordered else None
+
+
 class PublicCertificate(models.Model):
     """Model for storing a Partners Public Certificate."""
 
@@ -73,6 +107,15 @@ class PublicCertificate(models.Model):
         if not cert_info["serial"] is None:
             self.serial_number = cert_info["serial"].__str__()
         super().save(*args, **kwargs)
+
+    def is_valid(self, at_time=None):
+        """Check if the certificate is within its validity period at ``at_time``."""
+        at_time = at_time or timezone.now()
+        if self.valid_from and at_time < self.valid_from:
+            return False
+        if self.valid_to and at_time > self.valid_to:
+            return False
+        return True
 
     def __str__(self):
         return str(self.name)
@@ -202,6 +245,16 @@ class Partner(models.Model):
     encryption_cert = models.ForeignKey(
         PublicCertificate, null=True, blank=True, on_delete=models.SET_NULL
     )
+    encryption_cert_rollover = models.ManyToManyField(
+        PublicCertificate,
+        related_name="partner_e_rollover",
+        blank=True,
+        verbose_name=_("Encryption Certificate Rollover List"),
+        help_text=_(
+            "Additional encryption certificates for this partner, the one that is "
+            "currently valid is used for encrypting outbound messages."
+        ),
+    )
     signature = models.CharField(
         max_length=20,
         verbose_name=_("Sign Message"),
@@ -215,6 +268,16 @@ class Partner(models.Model):
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
+    )
+    signature_cert_rollover = models.ManyToManyField(
+        PublicCertificate,
+        related_name="partner_s_rollover",
+        blank=True,
+        verbose_name=_("Signature Certificate Rollover List"),
+        help_text=_(
+            "Additional signature certificates for this partner, inbound messages "
+            "and MDNs are verified against each of them."
+        ),
     )
 
     mdn = models.BooleanField(verbose_name=_("Request MDN"), default=False)
@@ -269,8 +332,35 @@ class Partner(models.Model):
     )
 
     @property
-    def as2partner(self):
-        """Returns an object of pyas2lib's Partner class"""
+    def encryption_cert_candidates(self):
+        """Return the encryption certificates of this partner, preferred one first."""
+        return order_certificates(
+            [self.encryption_cert, *self.encryption_cert_rollover.all()]
+        )
+
+    @property
+    def signature_cert_candidates(self):
+        """Return the signature certificates of this partner, preferred one first."""
+        return order_certificates(
+            [self.signature_cert, *self.signature_cert_rollover.all()]
+        )
+
+    @property
+    def active_encryption_cert(self):
+        """Return the encryption certificate to be used for outbound messages."""
+        return select_certificate(self.encryption_cert_candidates)
+
+    @property
+    def active_signature_cert(self):
+        """Return the signature certificate to be used for verifying signatures."""
+        return select_certificate(self.signature_cert_candidates)
+
+    def build_as2partner(self, signature_cert=None, encryption_cert=None):
+        """Returns an object of pyas2lib's Partner class.
+
+        The certificates to be used can be given explicitly, by default the
+        currently valid ones from the rollover lists are used.
+        """
         params = {
             "as2_name": self.as2_name,
             "compress": self.compress,
@@ -282,25 +372,63 @@ class Partner(models.Model):
             "mdn_digest_alg": self.mdn_sign,
         }
 
-        if self.signature_cert:
-            params["verify_cert"] = bytes(self.signature_cert.certificate)
-            if self.signature_cert.certificate_ca:
-                params["verify_cert_ca"] = bytes(self.signature_cert.certificate_ca)
-            params["validate_certs"] = self.signature_cert.verify_cert
+        signature_cert = signature_cert or self.active_signature_cert
+        encryption_cert = encryption_cert or self.active_encryption_cert
 
-        if self.encryption_cert:
-            params["encrypt_cert"] = bytes(self.encryption_cert.certificate)
-            if self.encryption_cert.certificate_ca:
-                params["encrypt_cert_ca"] = bytes(self.encryption_cert.certificate_ca)
-            params["validate_certs"] = self.encryption_cert.verify_cert
+        if signature_cert:
+            params["verify_cert"] = bytes(signature_cert.certificate)
+            if signature_cert.certificate_ca:
+                params["verify_cert_ca"] = bytes(signature_cert.certificate_ca)
+            params["validate_certs"] = signature_cert.verify_cert
+
+        if encryption_cert:
+            params["encrypt_cert"] = bytes(encryption_cert.certificate)
+            if encryption_cert.certificate_ca:
+                params["encrypt_cert_ca"] = bytes(encryption_cert.certificate_ca)
+            params["validate_certs"] = encryption_cert.verify_cert
 
         if self.confirmation_message:
             params["mdn_confirm_text"] = self.confirmation_message
 
         return As2Partner(**params)
 
+    @property
+    def as2partner(self):
+        """Returns an object of pyas2lib's Partner class"""
+        return self.build_as2partner()
+
     def __str__(self):
         return str(self.name)
+
+
+def parse_as2mdn(raw_content, message):
+    """Parse a received MDN and verify it against the partner's certificates.
+
+    A partner that is rolling over its certificate could have signed the MDN with
+    any certificate from its rollover list, so verification is attempted with each
+    of them until one succeeds.
+
+    :return: A three element tuple containing the pyas2lib Mdn object, the status
+        and the detailed status of the MDN.
+    """
+    result = None
+    for signature_cert in message.partner.signature_cert_candidates or [None]:
+        as2mdn = As2Mdn()
+        status, detailed_status = as2mdn.parse(
+            raw_content,
+            lambda x, y, cert=signature_cert: message.build_as2message(
+                signature_cert=cert
+            ),
+        )
+        # Only a failure to verify the MDN is worth a retry with another certificate
+        if status != "failed/Failure" or detailed_status == "mdn-not-found":
+            return as2mdn, status, detailed_status
+
+        # Keep the first failure, it is the one for the certificate in use
+        if result is None:
+            result = (as2mdn, status, detailed_status)
+
+    return result
 
 
 class MessageManager(models.Manager):
@@ -429,22 +557,27 @@ class Message(models.Model):
 
         unique_together = ("message_id", "partner")
 
-    @property
-    def as2message(self):
-        """Returns an object of pyas2lib's Message class"""
+    def build_as2message(self, signature_cert=None):
+        """Returns an object of pyas2lib's Message class.
+
+        The partner signature certificate to be used can be given explicitly,
+        by default the currently valid one is used.
+        """
+        as2partner = self.partner.build_as2partner(signature_cert=signature_cert)
         if self.direction == "IN":
-            as2m = As2Message(
-                sender=self.partner.as2partner, receiver=self.organization.as2org
-            )
+            as2m = As2Message(sender=as2partner, receiver=self.organization.as2org)
         else:
-            as2m = As2Message(
-                sender=self.organization.as2org, receiver=self.partner.as2partner
-            )
+            as2m = As2Message(sender=self.organization.as2org, receiver=as2partner)
 
         as2m.message_id = self.message_id
         as2m.mic = self.mic
 
         return as2m
+
+    @property
+    def as2message(self):
+        """Returns an object of pyas2lib's Message class"""
+        return self.build_as2message()
 
     @property
     def status_icon(self):
@@ -515,9 +648,8 @@ class Message(models.Model):
                     f"Received MDN response for message {self.message_id} "
                     f"with content: {mdn_content}"
                 )
-                as2mdn = As2Mdn()
-                mdn_status, mdn_detailed_status = as2mdn.parse(
-                    mdn_content, lambda x, y: self.as2message
+                as2mdn, mdn_status, mdn_detailed_status = parse_as2mdn(
+                    mdn_content, self
                 )
 
                 # Update the message status and return the response

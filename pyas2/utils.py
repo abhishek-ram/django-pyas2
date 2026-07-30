@@ -5,6 +5,15 @@ from string import Template
 
 logger = logging.getLogger("pyas2")
 
+# The disposition modifiers set by pyas2lib when the certificate used for verifying
+# the signature of a message is either invalid or not the one that signed it.
+SIGNATURE_ERROR_MODIFIERS = ("authentication-failed", "invalid-certificate")
+
+
+def is_signature_error(exception):
+    """Check if the exception was caused by the signature verification certificate."""
+    return getattr(exception, "disposition_modifier", None) in SIGNATURE_ERROR_MODIFIERS
+
 
 def run_post_send(message):
     """Execute command after successful send, can be used to notify

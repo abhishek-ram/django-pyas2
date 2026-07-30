@@ -40,22 +40,30 @@ Field Name                  Description                                  Mandato
 Security Settings
 -----------------
 
-======================  ==========================================  =========
-Field Name              Description                                 Mandatory
-======================  ==========================================  =========
-``Compress Message``    Check this option to enable AS2 message     No
-                        compression.
-``Encrypt Message``     Select the algorithm to be used for         No
-                        encrypting messages, defaults to None.
-``Encryption Key``      Select the ``Public Key`` used for          No
-                        encrypting the outbound messages
-                        to this partner.
-``Sign Message``        Select the hash algorithm to be used for    No
-                        signing messages, defaults to None.
-                        incoming messages from trading partners.
-``Signature key``       The ``Public Key`` used to verify inbound   No
-                        signed messages and MDNs from this partner
-======================  ==========================================  =========
+========================================  ==============================================  =========
+Field Name                                Description                                     Mandatory
+========================================  ==============================================  =========
+``Compress Message``                      Check this option to enable AS2 message         No
+                                          compression.
+``Encrypt Message``                       Select the algorithm to be used for encrypting  No
+                                          messages, defaults to None.
+``Encryption Key``                        Select the ``Public Key`` used for encrypting   No
+                                          the outbound messages to this partner.
+``Encryption Certificate Rollover List``  Additional ``Public Keys`` of this partner      No
+                                          used for encrypting outbound messages, see
+                                          :ref:`certificate-rollover`.
+``Sign Message``                          Select the hash algorithm to be used for        No
+                                          signing messages, defaults to None. incoming
+                                          messages from trading partners.
+``Signature key``                         The ``Public Key`` used to verify inbound       No
+                                          signed messages and MDNs from this partner
+``Signature Certificate Rollover List``   Additional ``Public Keys`` of this partner      No
+                                          used for verifying inbound messages and MDNs,
+                                          see :ref:`certificate-rollover`.
+========================================  ==============================================  =========
+
+Either the certificate field or its rollover list must be set when message encryption
+or signing is enabled.
 
 MDN Settings
 ------------

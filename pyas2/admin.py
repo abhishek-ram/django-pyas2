@@ -65,13 +65,14 @@ class PartnerAdmin(admin.ModelAdmin):
         "as2_name",
         "target_url",
         "encryption",
-        "encryption_cert",
+        "active_encryption_cert",
         "signature",
-        "signature_cert",
+        "active_signature_cert",
         "mdn",
         "mdn_mode",
     ]
     list_filter = ("name", "as2_name")
+    filter_horizontal = ("encryption_cert_rollover", "signature_cert_rollover")
     fieldsets = (
         (
             None,
@@ -107,8 +108,10 @@ class PartnerAdmin(admin.ModelAdmin):
                     "compress",
                     "encryption",
                     "encryption_cert",
+                    "encryption_cert_rollover",
                     "signature",
                     "signature_cert",
+                    "signature_cert_rollover",
                 ),
             },
         ),
@@ -128,6 +131,20 @@ class PartnerAdmin(admin.ModelAdmin):
         ),
     )
     actions = ["send_message"]
+
+    @staticmethod
+    def active_encryption_cert(obj):
+        """Return the certificate currently used for encrypting messages."""
+        return obj.active_encryption_cert
+
+    active_encryption_cert.short_description = "Encryption Certificate"
+
+    @staticmethod
+    def active_signature_cert(obj):
+        """Return the certificate currently used for verifying signatures."""
+        return obj.active_signature_cert
+
+    active_signature_cert.short_description = "Signature Certificate"
 
     def send_message(self, request, queryset):  # pylint: disable=W0613,R0201
         """Send the message to the first partner chosen by the user."""

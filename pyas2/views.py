@@ -22,6 +22,8 @@ from pyas2.models import Organization
 from pyas2.models import Partner
 from pyas2.models import PrivateKey
 from pyas2.models import PublicCertificate
+from pyas2.models import parse_as2mdn
+from pyas2.utils import is_signature_error
 from pyas2.utils import run_post_receive
 from pyas2.utils import run_post_send
 from pyas2.forms import SendAs2MessageForm
@@ -35,6 +37,14 @@ class ReceiveAs2Message(View):
     Class receives AS2 requests from partners.
     Checks whether its an AS2 message or an MDN and acts accordingly.
     """
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        # The partner of the message being received and the certificate to be used
+        # for verifying its signature, both set while parsing the message.
+        self.partner = None
+        self.signature_cert = None
 
     @staticmethod
     def find_message(message_id, partner_id):
@@ -61,13 +71,54 @@ class ReceiveAs2Message(View):
             return org.as2org
         return None
 
-    @staticmethod
-    def find_partner(partner_id):
+    def find_partner(self, partner_id):
         """Find the partner using the As2 Id and return its pyas2 type"""
         partner = Partner.objects.filter(as2_name=partner_id).first()
         if partner:
-            return partner.as2partner
+            self.partner = partner
+            return partner.build_as2partner(signature_cert=self.signature_cert)
         return None
+
+    def parse_as2_message(self, request_body):
+        """Parse the received payload as an AS2 message.
+
+        A partner that is rolling over its certificate could have signed the message
+        with any certificate from its rollover list, so on a signature failure the
+        message is parsed again with each of the remaining certificates.
+
+        :return: A two element tuple containing the pyas2lib Message object and the
+            result of parsing it as returned by pyas2lib.
+        """
+        as2message = As2Message()
+        result = as2message.parse(
+            request_body,
+            self.find_organization,
+            self.find_partner,
+            self.check_message_exists,
+        )
+
+        if not is_signature_error(result[1][0]) or not self.partner:
+            return as2message, result
+
+        # The first attempt used the first candidate, so try the remaining ones
+        for signature_cert in self.partner.signature_cert_candidates[1:]:
+            logger.debug(
+                f"Retrying signature verification of message "
+                f'{as2message.headers.get("message-id")} with the rollover '
+                f"certificate {signature_cert}."
+            )
+            self.signature_cert = signature_cert
+            retry_message = As2Message()
+            retry_result = retry_message.parse(
+                request_body,
+                self.find_organization,
+                self.find_partner,
+                self.check_message_exists,
+            )
+            if not is_signature_error(retry_result[1][0]):
+                return retry_message, retry_result
+
+        return as2message, result
 
     @xframe_options_exempt
     @csrf_exempt
@@ -100,6 +151,15 @@ class ReceiveAs2Message(View):
             message = Message.objects.get(
                 message_id=as2mdn.orig_message_id, direction="OUT"
             )
+
+            # The partner may have signed the MDN with any certificate from its
+            # rollover list, so verify it against each of them before failing.
+            if (
+                status == "failed/Failure"
+                and len(message.partner.signature_cert_candidates) > 1
+            ):
+                as2mdn, status, detailed_status = parse_as2mdn(request_body, message)
+
             logger.info(
                 f"Asynchronous MDN received for AS2 message {as2mdn.message_id} to organization "
                 f"{message.organization.as2_name} from partner {message.partner.as2_name}"
@@ -122,12 +182,8 @@ class ReceiveAs2Message(View):
 
         else:
             logger.debug("Payload is not an MDN parse it as an AS2 Message")
-            as2message = As2Message()
-            status, exception, as2mdn = as2message.parse(
-                request_body,
-                self.find_organization,
-                self.find_partner,
-                self.check_message_exists,
+            as2message, (status, exception, as2mdn) = self.parse_as2_message(
+                request_body
             )
 
             logger.info(
