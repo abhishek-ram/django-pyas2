@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
             name="payload",
             field=models.FileField(
                 blank=True,
-                max_length=4096,
+                max_length=100,
                 null=True,
                 upload_to=pyas2.models.get_mdn_store,
             ),
@@ -26,7 +26,7 @@ class Migration(migrations.Migration):
             name="payload",
             field=models.FileField(
                 blank=True,
-                max_length=4096,
+                max_length=100,
                 null=True,
                 upload_to=pyas2.models.get_message_store,
             ),
